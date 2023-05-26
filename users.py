@@ -204,14 +204,6 @@ def main():
     """
     This is main function of our module
     """
-    user1 = User("Matin", "12345678", "09197951537")
-    user2 = User("Saman", "qwerty")
-    user3 = User("Mehdi", "zxcvbnm")
-    user4 = User("Ali", "1234567890", "09365181897")
-    print(user1.username,
-          user2.username, user3.username,
-          user4.username, sep="****")
-    print(type(user1))
 
 
 if __name__ == "__main__":
