@@ -80,18 +80,8 @@ class User:
         """
         return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
 
-    def password_login_check(self, passwd):
-        """
-        this method is used for password check
-        if entered password is not equal to/
-        real password, an error raised
-        """
-        new_key = User.hashing(passwd)
-        if not new_key == self.password:
-            raise PasswordError("Wrong Password! ")
-
     @classmethod
-    def sign_in_validation(cls, user_name: str, passwd: str) -> bool:
+    def sign_in_validation(cls, user_name: str, passwd: str):
         """
         This method is for sign in validation/
         and give username and password/
@@ -105,11 +95,11 @@ class User:
         """
         if user_name not in cls.dictionary:
             raise UserError("Username not found! ")
-        for usr in cls.dictionary:
-            if user_name == usr:
-                cls_obj = User.get_obj(user_name, passwd)
-        cls_obj.password_login_check(passwd)
-        return cls_obj
+        new_key = User.hashing(passwd)
+        if cls.dictionary[user_name]["_User__password"] != new_key:
+            raise PasswordError("Wrong Password!")
+        usr_obj = cls.get_obj(user_name, passwd)
+        return usr_obj
 
     dictionary = {}
 
@@ -148,7 +138,7 @@ class User:
             User.dictionary.update({self.username: self.__dict__})
         if ph_numb != "":
             self.phone_number = ph_numb
-            User.dictionary[self.username][self.phone_number] = ph_numb
+            User.dictionary[self.username]["phone_number"] = ph_numb
 
     def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -221,6 +211,7 @@ def main():
     print(user1.username,
           user2.username, user3.username,
           user4.username, sep="****")
+    print(type(user1))
 
 
 if __name__ == "__main__":
