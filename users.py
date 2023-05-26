@@ -54,6 +54,11 @@ class User:
     def json_save(dictionary):
         with open("database.json", mode="w+", encoding="utf-8") as f_1:
             json.dump(dictionary, f_1, indent=4)
+    
+    @classmethod
+    def json_import(cls) -> dict:
+        with open("database.json", mode="r", encoding="utf-8") as f_1:
+            return json.load(f_1)
 
     @classmethod
     def get_obj(cls, username):
