@@ -144,7 +144,9 @@ class User:
         if usr_name in User.dictionary:
             raise RepUserError("Username already Taken! ")
         if usr_name != "":
+            del User.dictionary[self.username]
             self.username = usr_name
+            User.dictionary.update({self.username: self.__dict__})
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username][self.phone_number] = ph_numb
@@ -216,7 +218,10 @@ def main():
     user1 = User("Matin", "12345678", "09197951537")
     user2 = User("Saman", "qwerty")
     user3 = User("Mehdi", "zxcvbnm")
-    print(user1.username, user2.username, user3.username, sep="****")
+    user4 = User("Ali", "1234567890", "09365181897")
+    print(user1.username,
+          user2.username, user3.username,
+          user4.username, sep="****")
 
 
 if __name__ == "__main__":
