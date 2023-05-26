@@ -2,7 +2,6 @@
 
 import uuid
 import hashlib
-import os
 import json
 
 
@@ -56,17 +55,20 @@ class User:
         hashed_pass = (hashlib.sha256(passwd.encode("utf-8")).hexdigest())
         return hashed_pass
 
-    all_ids, all_hashes, all_salts = [], [], []
-
-    def __init__(self, username: str, password: str, phone_number: str = None):
+    def __init__(
+            self, username: str, password: str,
+            phone_number: str = None,
+            user_id: str = None
+            ):
         """
         The __init__ method for assigning attributes
         """
         self.username, self.password = username, password
-        self.user_id = User.uuid_gen()
+        if user_id is None:
+            self.user_id = User.uuid_gen()
+        else:
+            self.user_id = user_id
         self.phone_number = phone_number
-        User.all_ids.append(self.user_id)
-        User.all_hashes.append(self.password)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
             User.json_save(User.dictionary)
@@ -74,7 +76,7 @@ class User:
     @staticmethod
     def json_save(dictionary):
         with open("database.json", mode="w+", encoding="utf-8") as f_1:
-            json.dump(dictionary, f_1)
+            json.dump(dictionary, f_1, indent=4)
 
     @classmethod
     def get_obj(cls, username):
@@ -120,9 +122,9 @@ class User:
         else if entered password is not match/
         print wrong password error.
         """
-        if user_name not in cls.all_usernames:
+        if user_name not in cls.dictionary:
             raise UserError("Username not found! ")
-        for usr in cls.all_usernames:
+        for usr in cls.dictionary:
             if user_name == usr:
                 cls_obj = User.get_obj(user_name)
         cls_obj.password_login_check(passwd)
@@ -145,7 +147,7 @@ class User:
         """
         This static method actually for checking repetitious usernames
         """
-        if user_name in User.all_usernames:
+        if user_name in User.dictionary:
             return False
         return True
 
@@ -157,15 +159,13 @@ class User:
         , assigning given username and phone number/
         to this instance Attributes
         """
-        if usr_name in User.all_usernames:
+        if usr_name in User.dictionary:
             raise RepUserError("Username already Taken! ")
         if usr_name != "":
-            User.all_usernames.remove(self.username)
             self.username = usr_name
-            User.all_usernames.append(self.username)
-            User.dictionary[self] = usr_name
         if ph_numb != "":
             self.phone_number = ph_numb
+            User.dictionary[self.username][self.phone_number] = ph_numb
 
     def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -180,8 +180,6 @@ class User:
         if new_pass != rep_new_pass:
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
-        User.all_hashes.remove(old_key)
-        User.all_hashes.append(self.password)
 
     @property
     def username(self):
@@ -233,13 +231,10 @@ def main():
     """
     This is main function of our module
     """
-    user1 = User("Matin", "12345678", phone_number="09197951537")
+    user1 = User("Matin", "12345678", "09197951537")
     user2 = User("Saman", "qwerty")
     user3 = User("Mehdi", "zxcvbnm")
     print(user1.username, user2.username, user3.username, sep="****")
-    print(User.all_users)
-    print(User.all_usernames)
-    print(User.all_ids)
 
 
 if __name__ == "__main__":
