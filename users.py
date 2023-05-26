@@ -61,16 +61,14 @@ class User:
             return json.load(f_1)
 
     @classmethod
-    def get_obj(cls, username):
-        with open("database.json", mode="r", encoding="utf-8") as f_1:
-            js_on = json.load(f_1)
+    def get_obj(cls, username, password):
         if username not in cls.dictionary:
             raise UserError("Username not found! ")
-        for i, j in js_on.items():
+        for i, j in cls.dictionary.items():
             if i == username:
                 return cls(
                         j["username"],
-                        j["_User__password"],
+                        password,
                         j["phone_number"],
                         j["user_id"]
                         )
@@ -109,7 +107,7 @@ class User:
             raise UserError("Username not found! ")
         for usr in cls.dictionary:
             if user_name == usr:
-                cls_obj = User.get_obj(user_name)
+                cls_obj = User.get_obj(user_name, passwd)
         cls_obj.password_login_check(passwd)
         return cls_obj
 
