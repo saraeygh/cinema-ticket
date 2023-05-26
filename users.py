@@ -70,8 +70,9 @@ class User:
             if i == username:
                 return cls(
                         j["username"],
-                        j["__password"],
-                        j["phone_number"]
+                        j["_User__password"],
+                        j["phone_number"],
+                        j["user_id"]
                         )
 
     def __str__(self):
