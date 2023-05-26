@@ -19,11 +19,9 @@ while 1:
         continue
     if stat == "5":
         print("***** ^ Secret Admin panel ^ *****")
-        print(User.all_usernames, end="\n\n")
-        for i in User.all_hashes:
-            print(i)
+        print(User.dictionary.keys(), end="\n\n")
         for i, j in User.dictionary.items():
-            print(j, i, sep="\t")
+            print(i, j, sep="\t")
 
     elif stat == "1":
         print("\n********** ^ Sign up form ^ **********\n")
