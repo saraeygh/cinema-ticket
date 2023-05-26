@@ -3,7 +3,7 @@
 import uuid
 import hashlib
 import json
-from exceptions import (
+from custom_exceptions import (
     UserError,
     RepUserError,
     ShortPasswordError,
