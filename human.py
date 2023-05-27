@@ -39,30 +39,33 @@ class Human(ABC):
         hashed_pass = (hashlib.sha256(password.encode("utf-8")).hexdigest())
         return hashed_pass
 
-    @abstractmethod
-    def json_create(self):
+    @staticmethod
+    def json_create(filename):
         """
         This method creates a json file when there/
         is no json file as a database to start the program.
         """
-        pass
+        with open(filename, mode="w+", encoding="utf-8") as f_1:
+            json.dump({}, f_1)
 
     @staticmethod
-    def json_save(dictionary: dict):
+    def json_save(filename, dictionary):
         """
         This static method save or dump our class dictionary into/
         database.json JSON fileeverytime use this method,/
         the JSON file emptied and rewrite the class dictionary into it
         """
-        pass
+        with open(filename, mode="w+", encoding="utf-8") as f_1:
+            json.dump(dictionary, f_1, indent=4)
 
-    @abstractmethod
-    def json_import(self):
+    @staticmethod
+    def json_import(filename) -> dict:
         """
         This class method import whole content of database.json file into/
         our class dictionary with json.load() method
         """
-        pass
+        with open(filename, mode="r", encoding="utf-8") as f_1:
+            return json.load(f_1)
 
     @abstractmethod
     def get_obj(self, username: str, password: str):
@@ -207,7 +210,7 @@ class User(Human):
     def __init__(
             self, fname: str, lname: str,
             username: str, password: str,
-            birth_date: str,join_date: str,
+            birth_date: str, join_date: str,
             phone_number: str = None,
             user_id: str = None
             ):
@@ -216,39 +219,13 @@ class User(Human):
         """
         super().__init__(fname, lname, username, password,
                          birth_date, phone_number, user_id)
+        self.join_date = join_date
         self.current_plan = "Bronze"
         self.wallet = 0
+        User.all_usernames.append(self.username)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
-            User.json_save(User.dictionary)
-
-    @classmethod
-    def json_create(cls):
-        """
-        This method creates a json file when there/
-        is no json file as a database to start the program.
-        """
-        with open("users.json", mode="w+", encoding="utf-8") as f_1:
-            json.dump({}, f_1)
-
-    @staticmethod
-    def json_save(dictionary):
-        """
-        This static method save or dump our class dictionary into/
-        database.json JSON fileeverytime use this method,/
-        the JSON file emptied and rewrite the class dictionary into it
-        """
-        with open("users.josn", mode="w+", encoding="utf-8") as f_1:
-            json.dump(dictionary, f_1, indent=4)
-
-    @classmethod
-    def json_import(cls) -> dict:
-        """
-        This class method import whole content of database.json file into/
-        our class dictionary with json.load() method
-        """
-        with open("users.json", mode="r", encoding="utf-8") as f_1:
-            return json.load(f_1)
+            User.json_save("users.json", User.dictionary)
 
     @classmethod
     def get_obj(cls, username, password):
