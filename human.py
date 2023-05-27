@@ -53,6 +53,10 @@ class Human:
 
     @classmethod
     def json_create(cls):
+        """
+        This method creates a json file when there/
+        is no json file as a database to start the program.
+        """
         with open("database.json", mode="w+", encoding="utf-8") as f_1:
             json.dump({}, f_1)
 
