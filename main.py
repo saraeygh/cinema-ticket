@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 
+from os import path
 from getpass import getpass
 from users import (
         User,
@@ -10,8 +11,11 @@ from users import (
         ShortPasswordError
         )
 
+if path.exists("./database.json"):
+    User.json_import()
+else:
+    User.json_create()
 
-User.json_create()
 while 1:
     print("\n********** - Welcome to user management panel - **********\n")
     User.dictionary = User.json_import()
