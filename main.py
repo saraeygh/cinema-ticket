@@ -12,7 +12,7 @@ from users import (
         )
 
 if path.exists("./database.json"):
-    User.json_import()
+    User.dictionary = User.json_import()
 else:
     User.json_create()
 
