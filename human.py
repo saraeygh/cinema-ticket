@@ -12,7 +12,7 @@ from custom_exceptions import (
 )
 
 
-class User:
+class Human:
     """
     This class is use for modeling users and some functionality/
     like username, password, a unique identifier and phone number./
@@ -43,13 +43,13 @@ class User:
         """
         self.username, self.password = username, password
         if user_id is None:
-            self.user_id = User.uuid_gen()
+            self.user_id = Human.uuid_gen()
         else:
             self.user_id = user_id
         self.phone_number = phone_number
-        if self.username not in User.dictionary:
-            User.dictionary.update({self.username: self.__dict__})
-            User.json_save(User.dictionary)
+        if self.username not in Human.dictionary:
+            Human.dictionary.update({self.username: self.__dict__})
+            Human.json_save(Human.dictionary)
 
     @classmethod
     def json_create(cls):
@@ -118,7 +118,7 @@ class User:
         """
         if user_name not in cls.dictionary:
             raise UserError("Username not found! ")
-        new_key = User.hashing(passwd)
+        new_key = Human.hashing(passwd)
         if cls.dictionary[user_name]["_User__password"] != new_key:
             raise PasswordError("Wrong Password!")
         usr_obj = cls.get_obj(user_name, passwd)
@@ -141,7 +141,7 @@ class User:
         """
         This static method actually for checking repetitious usernames
         """
-        if user_name in User.all_usernames:
+        if user_name in Human.all_usernames:
             return False
         return True
 
@@ -153,17 +153,17 @@ class User:
         , assigning given username and phone number/
         to this instance Attributes
         """
-        if usr_name in User.dictionary:
+        if usr_name in Human.dictionary:
             raise RepUserError("Username already Taken! ")
         if usr_name != "":
-            del User.dictionary[self.username]
+            del Human.dictionary[self.username]
             self.username = usr_name
-            User.dictionary.update({self.username: self.__dict__})
-            User.json_save(User.dictionary)
+            Human.dictionary.update({self.username: self.__dict__})
+            Human.json_save(Human.dictionary)
         if ph_numb != "":
             self.phone_number = ph_numb
-            User.dictionary[self.username]["phone_number"] = ph_numb
-            User.json_save(User.dictionary)
+            Human.dictionary[self.username]["phone_number"] = ph_numb
+            Human.json_save(Human.dictionary)
 
     def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -172,14 +172,14 @@ class User:
         or new password and Repeat it not match together/
         raise an error.
         """
-        old_key = User.hashing(old_pass)
+        old_key = Human.hashing(old_pass)
         if old_key != self.password:
             raise PasswordError("Wrong original Password! ")
         if new_pass != rep_new_pass:
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
-        User.dictionary[self.username]["_User__password"] = self.password
-        User.json_save(User.dictionary)
+        Human.dictionary[self.username]["_User__password"] = self.password
+        Human.json_save(Human.dictionary)
 
     @property
     def username(self):
@@ -190,7 +190,7 @@ class User:
 
     @username.setter
     def username(self, user_value):
-        if not User.username_check(user_value):
+        if not Human.username_check(user_value):
             raise RepUserError("Username is already taken! ")
         self._username = user_value
 
@@ -213,9 +213,9 @@ class User:
 
     @password.setter
     def password(self, passwd_value):
-        if not User.password_check(passwd_value):
+        if not Human.password_check(passwd_value):
             raise ShortPasswordError("Too short Password! ")
-        key_value = User.hashing(passwd_value)
+        key_value = Human.hashing(passwd_value)
         self.__password = key_value
 
     @staticmethod
