@@ -23,6 +23,7 @@ class Human(ABC):
                  username: str, password: str,
                  birth_date: str, phone_number: str = None,
                  user_id: str = None):
+        self.fname, self.lname = fname, lname
         self.username, self.password = username, password
         if user_id is None:
             self.user_id = Human.uuid_gen()
@@ -67,8 +68,9 @@ class Human(ABC):
         with open(filename, mode="r", encoding="utf-8") as f_1:
             return json.load(f_1)
 
+    @classmethod
     @abstractmethod
-    def get_obj(self, username: str, password: str):
+    def get_obj(cls, username: str, password: str):
         """
         everytime we need to create an object in our class,/
         and take data from our imported dictionary from/
@@ -86,8 +88,9 @@ class Human(ABC):
         """
         return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
 
+    @classmethod
     @abstractmethod
-    def sign_in_validation(self, user_name: str, passwd: str):
+    def sign_in_validation(cls, user_name: str, password: str):
         """
         This method is for sign in validation/
         and give username and password/
@@ -101,8 +104,9 @@ class Human(ABC):
         """
         pass
 
+    @classmethod
     @abstractmethod
-    def signup(self, user_name: str, passwd: str, ph_numb: str = None):
+    def signup(cls, user_name: str, password: str, ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
@@ -131,7 +135,7 @@ class Human(ABC):
         pass
 
     @abstractmethod
-    def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
+    def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
         This function is for password changing.
         if entered old password in not match to original password/
@@ -155,12 +159,12 @@ class Human(ABC):
         self._username = user_value
 
     @staticmethod
-    def password_check(passwd: str) -> bool:
+    def password_check(password: str) -> bool:
         """
         This function actually check the password and if its length smaller
         than 4, an ValueError raised with the too short massage
         """
-        if len(passwd) < 4:
+        if len(password) < 4:
             return False
         return True
 
@@ -174,7 +178,7 @@ class Human(ABC):
 
     @password.setter
     @abstractmethod
-    def password(self, passwd_value):
+    def password(self, password_value):
         pass
 
     @staticmethod
@@ -283,13 +287,13 @@ class User(Human):
     dictionary = {}
 
     @classmethod
-    def signup(cls, user_name: str, passwd: str, ph_numb: str = None):
+    def signup(cls, fisrt_name: str, last_name: str, user_name: str, password: str, ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
         and finally enter phone number
         """
-        obj = cls(user_name, passwd, ph_numb)
+        obj = cls(user_name, password, ph_numb, ) 
         return obj
 
     @staticmethod
