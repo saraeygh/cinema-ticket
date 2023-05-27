@@ -18,7 +18,6 @@ else:
 
 while 1:
     print("\n********** - Welcome to user management panel - **********\n")
-    User.dictionary = User.json_import()
     stat = input("Stat (0(Exit) - 1(Sign Up) - 2(Sign In)):   ")
     if stat == "5":
         print("***** ^ Secret Admin panel ^ *****")
