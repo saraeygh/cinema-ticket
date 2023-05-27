@@ -1,3 +1,8 @@
+"""
+This module is for my custom Exceptions
+"""
+
+
 class ShortPasswordError(Exception):
     """
     I use this Error when Short Password has been Entered.
