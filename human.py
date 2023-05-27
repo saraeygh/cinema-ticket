@@ -214,8 +214,7 @@ class User(Human):
     def __init__(
             self, fname: str, lname: str,
             username: str, password: str,
-            birth_date: str, join_date: str,
-            phone_number: str = None,
+            birth_date: str, phone_number: str = None,
             user_id: str = None
             ):
         """
@@ -223,7 +222,6 @@ class User(Human):
         """
         super().__init__(fname, lname, username, password,
                          birth_date, phone_number, user_id)
-        self.join_date = join_date
         self.current_plan = "Bronze"
         self.wallet = 0
         User.all_usernames.append(self.username)
@@ -289,8 +287,7 @@ class User(Human):
     @classmethod
     def signup(cls, first_name: str, last_name: str,
                user_name: str, password: str,
-               birth_date: str, join_date: str,
-               ph_numb: str = None):
+               birth_date: str, ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
@@ -298,7 +295,7 @@ class User(Human):
         """
         obj = cls(first_name, last_name,
                   user_name, password,
-                  birth_date, join_date, ph_numb)
+                  birth_date, ph_numb)
         return obj
 
     @staticmethod
@@ -450,8 +447,8 @@ class Admin(Human):
         new_key = Human.hashing(password)
         if cls.dictionary[user_name]["_Admin__password"] != new_key:
             raise PasswordError("Wrong Password!")
-        usr_obj = cls.get_obj(user_name, password)
-        return usr_obj
+        adm_obj = cls.get_obj(user_name, password)
+        return adm_obj
 
     dictionary = {}
 
