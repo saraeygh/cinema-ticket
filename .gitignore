@@ -1,4 +1,6 @@
 /database.json
+/admins.json
+/users.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
