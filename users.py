@@ -159,6 +159,7 @@ class User:
             del User.dictionary[self.username]
             self.username = usr_name
             User.dictionary.update({self.username: self.__dict__})
+            User.json_save(User.dictionary)
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
