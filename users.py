@@ -22,7 +22,6 @@ class User:
     also user can enter his/her phone number and if phone number not entered,
      it assuming to None
     """
-
     @staticmethod
     def hashing(passwd: str) -> str:
         """
@@ -31,6 +30,8 @@ class User:
         """
         hashed_pass = (hashlib.sha256(passwd.encode("utf-8")).hexdigest())
         return hashed_pass
+
+    all_usernames = []
 
     def __init__(
             self, username: str, password: str,
@@ -52,22 +53,39 @@ class User:
 
     @staticmethod
     def json_save(dictionary):
+        """
+        This static method save or dump our class dictionary into/
+        database.json JSON fileeverytime use this method,/
+        the JSON file emptied and rewrite the class dictionary into it
+        """
         with open("database.json", mode="w+", encoding="utf-8") as f_1:
             json.dump(dictionary, f_1, indent=4)
-    
+
     @classmethod
     def json_import(cls) -> dict:
+        """
+        This class method import whole content of database.json file into/
+        our class dictionary with json.load() method
+        """
         with open("database.json", mode="r", encoding="utf-8") as f_1:
             return json.load(f_1)
 
     @classmethod
     def get_obj(cls, username, password):
+        """
+        everytime we need to create an object in our class,/
+        and take data from our imported dictionary from/
+        database.json, such as login a user in out panel,/
+        we use this method. we give it the/username and/
+        password of the user and it will return an object/
+        for us
+        """
         if username not in cls.dictionary:
             raise UserError("Username not found! ")
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(
-                        j["username"],
+                        j["_username"],
                         password,
                         j["phone_number"],
                         j["user_id"]
@@ -118,7 +136,7 @@ class User:
         """
         This static method actually for checking repetitious usernames
         """
-        if user_name in User.dictionary:
+        if user_name in User.all_usernames:
             return False
         return True
 
@@ -139,6 +157,7 @@ class User:
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
+            User.json_save(User.dictionary)
 
     def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -153,6 +172,8 @@ class User:
         if new_pass != rep_new_pass:
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
+        User.dictionary[self.username]["_User__password"] = self.password
+        User.json_save(User.dictionary)
 
     @property
     def username(self):
