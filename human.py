@@ -287,13 +287,18 @@ class User(Human):
     dictionary = {}
 
     @classmethod
-    def signup(cls, fisrt_name: str, last_name: str, user_name: str, password: str, ph_numb: str = None):
+    def signup(cls, first_name: str, last_name: str,
+               user_name: str, password: str,
+               birth_date: str, join_date: str,
+               ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
         and finally enter phone number
         """
-        obj = cls(user_name, password, ph_numb, ) 
+        obj = cls(first_name, last_name,
+                  user_name, password,
+                  birth_date, join_date, ph_numb)
         return obj
 
     @staticmethod
@@ -319,11 +324,11 @@ class User(Human):
             del User.dictionary[self.username]
             self.username = usr_name
             User.dictionary.update({self.username: self.__dict__})
-            User.json_save(User.dictionary)
+            User.json_save("users.json", User.dictionary)
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
-            User.json_save(User.dictionary)
+            User.json_save("users.json", User.dictionary)
 
     def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -339,7 +344,7 @@ class User(Human):
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
         User.dictionary[self.username]["_User__password"] = self.password
-        User.json_save(User.dictionary)
+        User.json_save("users.josn", User.dictionary)
 
     @property
     def username(self):
@@ -355,12 +360,12 @@ class User(Human):
         self._username = user_value
 
     @staticmethod
-    def password_check(passwd: str) -> bool:
+    def password_check(password: str) -> bool:
         """
         This function actually check the password and if its length smaller
         than 4, an ValueError raised with the too short massage
         """
-        if len(passwd) < 4:
+        if len(password) < 4:
             return False
         return True
 
@@ -385,6 +390,14 @@ class User(Human):
         and use MD5 Hash algorithm
         """
         return str(uuid.uuid4())
+
+
+class Admin(Human):
+    """
+    This class is for modeling Admins and/
+    inherites from Human Abstract user.
+    """
+    pass
 
 
 def main():
