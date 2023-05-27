@@ -216,6 +216,8 @@ class User(Human):
         """
         super().__init__(fname, lname, username, password,
                          birth_date, phone_number, user_id)
+        self.current_plan = "Bronze"
+        self.wallet = 0
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
             User.json_save(User.dictionary)
@@ -226,7 +228,7 @@ class User(Human):
         This method creates a json file when there/
         is no json file as a database to start the program.
         """
-        with open("database.json", mode="w+", encoding="utf-8") as f_1:
+        with open("users.json", mode="w+", encoding="utf-8") as f_1:
             json.dump({}, f_1)
 
     @staticmethod
@@ -236,7 +238,7 @@ class User(Human):
         database.json JSON fileeverytime use this method,/
         the JSON file emptied and rewrite the class dictionary into it
         """
-        with open("database.json", mode="w+", encoding="utf-8") as f_1:
+        with open("users.josn", mode="w+", encoding="utf-8") as f_1:
             json.dump(dictionary, f_1, indent=4)
 
     @classmethod
@@ -245,7 +247,7 @@ class User(Human):
         This class method import whole content of database.json file into/
         our class dictionary with json.load() method
         """
-        with open("database.json", mode="r", encoding="utf-8") as f_1:
+        with open("users.json", mode="r", encoding="utf-8") as f_1:
             return json.load(f_1)
 
     @classmethod
@@ -263,8 +265,12 @@ class User(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(
+                        j["fname"],
+                        j["lname"],
                         j["_username"],
                         password,
+                        j["birth_date"],
+                        j["join_date"],
                         j["phone_number"],
                         j["user_id"]
                         )
