@@ -19,7 +19,9 @@ while 1:
         print("***** ^ Secret Admin panel ^ *****")
         print(User.dictionary.keys(), end="\n\n")
         for i, j in User.dictionary.items():
-            print(i, j, sep="\t")
+            print(f"\n{i}")
+            for m, n in j.items():
+                print(f"\t{m}:\t{n}")
 
     elif stat == "1":
         print("\n********** ^ Sign up form ^ **********\n")
@@ -86,6 +88,7 @@ while 1:
                     print("\nYour Password has been changed! ")
 
             elif stat == "4":
+                del user_object
                 print("\nExiting User Panel...")
                 break
 
