@@ -51,6 +51,11 @@ class User:
             User.dictionary.update({self.username: self.__dict__})
             User.json_save(User.dictionary)
 
+    @classmethod
+    def json_create(cls):
+        with open("database.json", mode="w+", encoding="utf-8") as f_1:
+            json.dump({}, f_1)
+
     @staticmethod
     def json_save(dictionary):
         """
