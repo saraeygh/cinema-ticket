@@ -10,5 +10,11 @@
         "_User__password": "73180bd73332675b13afe366d0906e3668196d1a84ee3c7d499314a15b92b736",
         "user_id": "722da787-e401-4432-8005-be39a3336c17",
         "phone_number": ""
+    },
+    "Ali": {
+        "_username": "Ali",
+        "_User__password": "8eac0dd89da7b8ac7447d3158d59afe0c1345997a828a717b2aa20097ea9fffc",
+        "user_id": "a92cff8a-b0d5-4299-917b-3ca42b6d5e75",
+        "phone_number": ""
     }
 }
