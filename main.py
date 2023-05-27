@@ -11,6 +11,7 @@ from users import (
         )
 
 
+User.json_create()
 while 1:
     print("\n********** - Welcome to user management panel - **********\n")
     User.dictionary = User.json_import()
