@@ -87,7 +87,29 @@ class TestUser(unittest.TestCase):
     This test class is for testing User class/
     methods and functionality
     """
-    pass
+    @classmethod
+    def setUpClass(cls):
+        cls.dirpath = "./test_database"
+        cls.filepath = "./test_database/test.json"
+        os.makedirs("./test_database")
+        Human.json_create(TestHuman.filepath)
+
+    def test_get_obj(self):
+        user1 = User("Matin", "Ghane", "bavaar", "12345",
+                     "1999/11/20", "09197951537")
+        with self.assertRaises(UserError):
+            User.get_obj("Ali", "qwerty")
+        User.all_usernames.remove(user1.username)
+        user2 = User.get_obj("bavaar", "12345")
+        self.assertEqual(user1.__str__(), user2.__str__())
+
+    def test_sign_in_validation(self):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        mydir = pathlib.Path("./test_database")
+        shutil.rmtree(mydir)
 
 
 class TestAdmin(unittest.TestCase):
