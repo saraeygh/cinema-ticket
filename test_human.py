@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import json
 import shutil
 import pathlib
 from human import Human, User, Admin
@@ -20,12 +21,29 @@ class TestHuman(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.dirpath = "./test_database"
+        cls.filepath = "./test_database/test.json"
         os.makedirs("./test_database")
 
     def test_json_create(self):
+        """
+        creating a file in test_database directory/
+        and creating test.json to Testing json_create/
+        static method in Human Abstract class
+        """
         Human.json_create("./test_database/test.json")
         res = os.path.isfile("./test_database/test.json")
         self.assertEqual(res, True)
+
+    def test_json_save_and_import(self):
+        """
+        Testing json_import and json_save static methods/
+        functionality in Human Abstract class
+        """
+        dictionary = {"Matin": "Ghane"}
+        Human.json_save(TestHuman.filepath, dictionary)
+        res = Human.json_import(TestHuman.filepath)
+        self.assertEqual(res, dictionary)
 
     def test_instantiating_abstract(self):
         """
