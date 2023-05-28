@@ -1,12 +1,6 @@
 #! /usr/bin/python3
 
-from abc import (
-        ABC,
-        abstractmethod,
-        abstractclassmethod,
-        abstractstaticmethod,
-        abstractproperty
-        )
+from abc import ABC, abstractmethod
 from datetime import datetime
 import uuid
 import hashlib
@@ -250,6 +244,31 @@ class User(Human):
             User.dictionary.update({self.username: self.__dict__})
             Human.json_save("users.json", User.dictionary)
 
+    def reserve(self, ticket, time, etc):
+        """
+        Implement ticket reserve here
+        """
+        pass
+
+    def change_plan(self, old_plan, new_plan):
+        """
+        Implement User Change Plan here
+        """
+        pass
+
+    def add_bank(self, account_id):
+        """
+        Implement Add bank account to/
+        User bank accounts list here
+        """
+        pass
+
+    def discount(self, days_from_join):
+        """
+        Implement apply discount here
+        """
+        pass
+
     @classmethod
     def get_obj(cls, username, password):
         """
@@ -420,6 +439,30 @@ class Admin(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(j["_username"], password, j["user_id"])
+    
+    def add_show(self):
+        """
+        Implementing add a show here
+        """
+        pass
+
+    def remove_film(self):
+        """
+        Implementing remove a film here
+        """
+        pass
+
+    def add_film(self):
+        """
+        Implementing add a film here
+        """
+        pass
+
+    def edit_film(self):
+        """
+        Implementing edit a film here
+        """
+        pass
 
     def __str__(self):
         """
