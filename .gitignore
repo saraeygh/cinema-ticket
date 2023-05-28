@@ -1,6 +1,7 @@
 /database.json
 /admins.json
 /users.json
+/bank_accounts.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
