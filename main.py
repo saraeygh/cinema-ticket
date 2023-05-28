@@ -70,7 +70,7 @@ while 1:
                     stat = input("Stat (1(Show User Information) - 2(Edit) - 3(Password Change) - 4(Back to Main Menu)):   ")
                     if stat == "1":
                         print(user_object)
-        
+
                     elif stat == "2":
                         print("\n***** ^ Edit User information mode ^ *****\n")
                         print("abort change any item, leave it and Enter.\n")
@@ -89,7 +89,7 @@ while 1:
                             old_pass = getpass("Enter Old Password: ")
                             new_pass = getpass("Enter New Password: ")
                             rep_new_pass = getpass("Enter New Password again: ")
-                            user_object.passwd_change(old_pass, new_pass, rep_new_pass)
+                            user_object.password_change(old_pass, new_pass, rep_new_pass)
                         except PasswordError:
                             print("\nWrong Original Password! ")
                         except TwoPasswordError:
@@ -183,7 +183,7 @@ while 1:
                             old_pass = getpass("Enter Old Password: ")
                             new_pass = getpass("Enter New Password: ")
                             rep_new_pass = getpass("Enter New Password again: ")
-                            admin_object.passwd_change(old_pass, new_pass, rep_new_pass)
+                            admin_object.password_change(old_pass, new_pass, rep_new_pass)
                         except PasswordError:
                             print("\nWrong Original Password! ")
                         except TwoPasswordError:
