@@ -31,3 +31,9 @@ class TwoPasswordError(Exception):
     """
     I use this Error When two New Passwords are not Match.
     """
+
+
+class FileError(Exception):
+    """
+    I use this Error When File Not Found.
+    """
