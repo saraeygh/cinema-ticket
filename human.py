@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 from abc import ABC, abstractmethod
-import datetime
+from datetime import datetime
 import uuid
 import hashlib
 import json
@@ -19,6 +19,9 @@ class Human(ABC):
     This is an Abstract class for Users and/
     Admin
     """
+
+    all_usernames = []
+
     def __init__(self, fname: str, lname: str,
                  username: str, password: str,
                  birth_date: str, phone_number: str = None,
@@ -115,11 +118,11 @@ class Human(ABC):
         pass
 
     @staticmethod
-    def username_check(user_name: str):
+    def username_check(user_name: str, user_list):
         """
         This static method actually for checking repetitious usernames
         """
-        if user_name in User.all_usernames:
+        if user_name in user_list:
             return False
         return True
 
@@ -142,6 +145,7 @@ class Human(ABC):
         or new password and Repeat it not match together/
         raise an error.
         """
+        pass
 
     @property
     @abstractmethod
@@ -154,9 +158,7 @@ class Human(ABC):
     @username.setter
     @abstractmethod
     def username(self, user_value):
-        if not Human.username_check(user_value):
-            raise RepUserError("Username is already taken! ")
-        self._username = user_value
+        pass
 
     @staticmethod
     def password_check(password: str) -> bool:
@@ -200,14 +202,6 @@ class User(Human):
     also user can enter his/her phone number and if phone number not entered,
      it assuming to None
     """
-    @staticmethod
-    def hashing(password: str) -> str:
-        """
-        this is a static method that generates hash from a password
-        and unique salt for each user
-        """
-        hashed_pass = (hashlib.sha256(password.encode("utf-8")).hexdigest())
-        return hashed_pass
 
     all_usernames = []
 
@@ -215,19 +209,65 @@ class User(Human):
             self, fname: str, lname: str,
             username: str, password: str,
             birth_date: str, phone_number: str = None,
-            user_id: str = None
-            ):
+            user_id: str = None, join_date: str = None,
+            current_plan: str = None, wallet=None,
+            bank_accounts: list = None
+            ) -> None:
         """
         The __init__ method for assigning attributes
         """
         super().__init__(fname, lname, username, password,
                          birth_date, phone_number, user_id)
-        self.current_plan = "Bronze"
-        self.wallet = 0
+
+        if join_date is None:
+            self.join_date = str(datetime.now())
+        else:
+            self.join_date = join_date
+
+        if current_plan is None:
+            self.current_plan = "Bronze"
+        else:
+            self.current_plan = current_plan
+
+        if wallet is None:
+            self.wallet = 0
+        else:
+            self.wallet = wallet
+
+        if bank_accounts is None:
+            self.bank_accounts = []
+        else:
+            self.bank_accounts = bank_accounts
+
         User.all_usernames.append(self.username)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
             Human.json_save("users.json", User.dictionary)
+
+    def reserve(self, ticket, time, etc):
+        """
+        Implement ticket reserve here
+        """
+        pass
+
+    def change_plan(self, old_plan, new_plan):
+        """
+        Implement User Change Plan here
+        """
+        pass
+
+    def add_bank(self, account_id):
+        """
+        Implement Add bank account to/
+        User bank accounts list here
+        """
+        pass
+
+    def discount(self, days_from_join):
+        """
+        Implement apply discount here
+        """
+        pass
 
     @classmethod
     def get_obj(cls, username, password):
@@ -244,15 +284,10 @@ class User(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(
-                        j["fname"],
-                        j["lname"],
-                        j["_username"],
-                        password,
-                        j["birth_date"],
-                        j["join_date"],
-                        j["phone_number"],
-                        j["user_id"]
-                        )
+                        j["fname"], j["lname"], j["_username"], password,
+                        j["birth_date"], j["phone_number"], j["user_id"],
+                        j["join_date"], j["current_plan"], j["wallet"],
+                        j["bank_accounts"])
 
     def __str__(self):
         """
@@ -298,15 +333,6 @@ class User(Human):
                   birth_date, ph_numb)
         return obj
 
-    @staticmethod
-    def username_check(user_name: str) -> bool:
-        """
-        This static method actually for checking repetitious usernames
-        """
-        if user_name in User.all_usernames:
-            return False
-        return True
-
     def edit_user(self, usr_name: str = None, ph_numb: str = None):
         """
         This method is used for username and/
@@ -318,16 +344,17 @@ class User(Human):
         if usr_name in User.dictionary:
             raise RepUserError("Username already Taken! ")
         if usr_name != "":
+            User.all_usernames.remove(self.username)
             del User.dictionary[self.username]
             self.username = usr_name
+            User.all_usernames.append(self.username)
             User.dictionary.update({self.username: self.__dict__})
-            User.json_save("users.json", User.dictionary)
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
-            User.json_save("users.json", User.dictionary)
+        Human.json_save("users.json", User.dictionary)
 
-    def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
+    def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
         This function is for password changing.
         if entered old password in not match to original password/
@@ -341,7 +368,7 @@ class User(Human):
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
         User.dictionary[self.username]["_User__password"] = self.password
-        User.json_save("users.josn", User.dictionary)
+        Human.json_save("users.json", User.dictionary)
 
     @property
     def username(self):
@@ -352,19 +379,9 @@ class User(Human):
 
     @username.setter
     def username(self, user_value):
-        if not Human.username_check(user_value):
+        if not Human.username_check(user_value, User.all_usernames):
             raise RepUserError("Username is already taken! ")
         self._username = user_value
-
-    @staticmethod
-    def password_check(password: str) -> bool:
-        """
-        This function actually check the password and if its length smaller
-        than 4, an ValueError raised with the too short massage
-        """
-        if len(password) < 4:
-            return False
-        return True
 
     @property
     def password(self):
@@ -380,13 +397,13 @@ class User(Human):
         key_value = Human.hashing(passwd_value)
         self.__password = key_value
 
-    @staticmethod
-    def uuid_gen():
+    def delete_user(self):
         """
-        This function generate a universal unique identifier with uuid5
-        and use MD5 Hash algorithm
+        This function is for deleting an object/
+        from class when he/she logs out.
         """
-        return str(uuid.uuid4())
+        User.all_usernames.remove(self.username)
+        del self
 
 
 class Admin(Human):
@@ -395,6 +412,7 @@ class Admin(Human):
     inherites from Human Abstract user.
     """
     all_usernames = []
+
     def __init__(self, username, password, user_id: str = None):
         self.username, self.password = username, password
         if user_id is None:
@@ -404,7 +422,7 @@ class Admin(Human):
         Admin.all_usernames.append(self.username)
         if self.username not in Admin.dictionary:
             Admin.dictionary.update({self.username: self.__dict__})
-            User.json_save("admins.json", Admin.dictionary)
+            Human.json_save("admins.json", Admin.dictionary)
 
     @classmethod
     def get_obj(cls, username: str, password: str):
@@ -420,14 +438,38 @@ class Admin(Human):
             raise UserError("Username not found! ")
         for i, j in cls.dictionary.items():
             if i == username:
-                return cls(j["_username"], password)
+                return cls(j["_username"], password, j["user_id"])
+    
+    def add_show(self):
+        """
+        Implementing add a show here
+        """
+        pass
+
+    def remove_film(self):
+        """
+        Implementing remove a film here
+        """
+        pass
+
+    def add_film(self):
+        """
+        Implementing add a film here
+        """
+        pass
+
+    def edit_film(self):
+        """
+        Implementing edit a film here
+        """
+        pass
 
     def __str__(self):
         """
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
+        return f"\nUser Information:\n\tUsername: {self.username}\n\tUser ID: {self.user_id}"
 
     @classmethod
     def sign_in_validation(cls, user_name: str, password: str):
@@ -473,12 +515,14 @@ class Admin(Human):
         if usr_name in Admin.dictionary:
             raise RepUserError("Username already Taken! ")
         if usr_name != "":
+            Admin.all_usernames.remove(self.username)
             del Admin.dictionary[self.username]
             self.username = usr_name
+            Admin.all_usernames.append(self.username)
             Admin.dictionary.update({self.username: self.__dict__})
-            Human.json_save("admins.json", User.dictionary)
+        Human.json_save("admins.json", Admin.dictionary)
 
-    def passwd_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
+    def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
         This function is for password changing.
         if entered old password in not match to original password/
@@ -491,17 +535,8 @@ class Admin(Human):
         if new_pass != rep_new_pass:
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
-        User.dictionary[self.username]["_User__password"] = self.password
-        User.json_save("users.josn", User.dictionary)
-
-    @staticmethod
-    def username_check(user_name: str) -> bool:
-        """
-        This static method actually for checking repetitious usernames
-        """
-        if user_name in User.all_usernames:
-            return False
-        return True
+        Admin.dictionary[self.username]["_Admin__password"] = self.password
+        Human.json_save("admins.json", Admin.dictionary)
 
     @property
     def username(self):
@@ -512,19 +547,9 @@ class Admin(Human):
 
     @username.setter
     def username(self, user_value):
-        if not Human.username_check(user_value):
+        if not Human.username_check(user_value, Admin.all_usernames):
             raise RepUserError("Username is already taken! ")
         self._username = user_value
-
-    @staticmethod
-    def password_check(password: str) -> bool:
-        """
-        This function actually check the password and if its length smaller
-        than 4, an ValueError raised with the too short massage
-        """
-        if len(password) < 4:
-            return False
-        return True
 
     @property
     def password(self):
@@ -547,6 +572,14 @@ class Admin(Human):
         and use MD5 Hash algorithm
         """
         return str(uuid.uuid4())
+
+    def delete_admin(self):
+        """
+        This function is for deleting an object/
+        from class when he/she logs out.
+        """
+        Admin.all_usernames.remove(self.username)
+        del self
 
 
 def main():
