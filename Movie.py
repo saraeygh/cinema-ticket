@@ -68,7 +68,7 @@ while True:
     if choice == 1:
         name = input("Enter film name: ")
         genre = input("Enter film genre (Comedy / Action / Family / Romance): ")
-        age_rating = input("Enter film age rating (G / PG-13 / R / NC-17): ")
+        age_rating = int(input("Enter film age rating: "))
         film_manager.add_film(name, genre, age_rating)
         print("Film added successfully!")
         print()
