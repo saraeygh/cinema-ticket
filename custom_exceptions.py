@@ -31,3 +31,14 @@ class TwoPasswordError(Exception):
     """
     I use this Error When two New Passwords are not Match.
     """
+
+
+class InvalidNationalID(Exception):
+    """
+    Used for invalid national ID.
+    """
+
+class BalanceMinimum(Exception):
+    """
+    Used for minimum balance error.
+    """
