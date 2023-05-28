@@ -204,6 +204,7 @@ class User(Human):
     """
 
     all_usernames = []
+    dictionary = {}
 
     def __init__(
             self, fname: str, lname: str,
@@ -317,8 +318,6 @@ class User(Human):
         usr_obj = cls.get_obj(user_name, password)
         return usr_obj
 
-    dictionary = {}
-
     @classmethod
     def signup(cls, first_name: str, last_name: str,
                user_name: str, password: str,
@@ -412,6 +411,7 @@ class Admin(Human):
     inherites from Human Abstract user.
     """
     all_usernames = []
+    dictionary = {}
 
     def __init__(self, username, password, user_id: str = None):
         self.username, self.password = username, password
@@ -491,8 +491,6 @@ class Admin(Human):
             raise PasswordError("Wrong Password!")
         adm_obj = cls.get_obj(user_name, password)
         return adm_obj
-
-    dictionary = {}
 
     @classmethod
     def signup(cls, user_name: str, password: str, ph_numb: str = None):
