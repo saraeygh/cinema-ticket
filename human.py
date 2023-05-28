@@ -378,6 +378,14 @@ class User(Human):
         key_value = Human.hashing(passwd_value)
         self.__password = key_value
 
+    def delete_user(self):
+        """
+        This function is for deleting an object/
+        from class when he/she logs out.
+        """
+        User.all_usernames.remove(self.username)
+        del self
+
 
 class Admin(Human):
     """
@@ -469,7 +477,7 @@ class Admin(Human):
             self.username = usr_name
             Admin.all_usernames.append(self.username)
             Admin.dictionary.update({self.username: self.__dict__})
-        Human.json_save("admins.json", User.dictionary)
+        Human.json_save("admins.json", Admin.dictionary)
 
     def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -485,7 +493,7 @@ class Admin(Human):
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
         Admin.dictionary[self.username]["_Admin__password"] = self.password
-        Human.json_save("admins.josn", Admin.dictionary)
+        Human.json_save("admins.json", Admin.dictionary)
 
     @property
     def username(self):
@@ -521,6 +529,14 @@ class Admin(Human):
         and use MD5 Hash algorithm
         """
         return str(uuid.uuid4())
+
+    def delete_admin(self):
+        """
+        This function is for deleting an object/
+        from class when he/she logs out.
+        """
+        Admin.all_usernames.remove(self.username)
+        del self
 
 
 def main():
