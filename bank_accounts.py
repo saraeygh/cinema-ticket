@@ -187,7 +187,7 @@ class BankAccount:
         """
     
 def main():
-    reza = BankAccount.create_account("2210240344", "Reza", "Saraey", 100_000, "1234")
-
+    pass
+    
 if __name__ == "__main__":
     main()
