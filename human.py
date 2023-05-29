@@ -5,6 +5,8 @@ from datetime import datetime
 import uuid
 import hashlib
 import json
+import os
+import pathlib
 from custom_exceptions import (
     UserError,
     RepUserError,
@@ -202,7 +204,7 @@ class User(Human):
     also user can enter his/her phone number and if phone number not entered,
      it assuming to None
     """
-
+    jsonpath = pathlib.Path("./database/users.json")
     all_usernames = []
 
     def __init__(
@@ -242,7 +244,7 @@ class User(Human):
         User.all_usernames.append(self.username)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
-            Human.json_save("users.json", User.dictionary)
+            Human.json_save(User.jsonpath, User.dictionary)
 
     def reserve(self, ticket, time, etc):
         """
@@ -352,7 +354,7 @@ class User(Human):
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
-        Human.json_save("users.json", User.dictionary)
+        Human.json_save(User.jsonpath, User.dictionary)
 
     def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -368,7 +370,7 @@ class User(Human):
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
         User.dictionary[self.username]["_User__password"] = self.password
-        Human.json_save("users.json", User.dictionary)
+        Human.json_save(User.jsonpath, User.dictionary)
 
     @property
     def username(self):
@@ -412,6 +414,7 @@ class Admin(Human):
     inherites from Human Abstract user.
     """
     all_usernames = []
+    jsonpath = pathlib.Path("./database/admins.json")
 
     def __init__(self, username, password, user_id: str = None):
         self.username, self.password = username, password
@@ -422,7 +425,7 @@ class Admin(Human):
         Admin.all_usernames.append(self.username)
         if self.username not in Admin.dictionary:
             Admin.dictionary.update({self.username: self.__dict__})
-            Human.json_save("admins.json", Admin.dictionary)
+            Human.json_save(Admin.jsonpath, Admin.dictionary)
 
     @classmethod
     def get_obj(cls, username: str, password: str):
@@ -520,7 +523,7 @@ class Admin(Human):
             self.username = usr_name
             Admin.all_usernames.append(self.username)
             Admin.dictionary.update({self.username: self.__dict__})
-        Human.json_save("admins.json", Admin.dictionary)
+        Human.json_save(Admin.jsonpath, Admin.dictionary)
 
     def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
         """
@@ -536,7 +539,7 @@ class Admin(Human):
             raise TwoPasswordError("Unmatched new passwords")
         self.password = new_pass
         Admin.dictionary[self.username]["_Admin__password"] = self.password
-        Human.json_save("admins.json", Admin.dictionary)
+        Human.json_save(Admin.jsonpath, Admin.dictionary)
 
     @property
     def username(self):
