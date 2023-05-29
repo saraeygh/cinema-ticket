@@ -38,7 +38,14 @@ class InvalidNationalID(Exception):
     Used for invalid national ID.
     """
 
+
 class BalanceMinimum(Exception):
     """
     Used for minimum balance error.
+    """
+
+
+class FileError(Exception):
+    """
+    I use this Error When File Not Found.
     """
