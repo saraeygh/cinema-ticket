@@ -1,5 +1,5 @@
 import random
-import human
+from human import Human, User
 from datetime import datetime
 import custom_exceptions
 
@@ -51,8 +51,8 @@ class BankAccount:
         self.first_name = first_name
         self.last_name = last_name
         self._balance = balance
-        self._password = human.Human.hashing(password)
-        self.creation_date = str(datetime.now())
+        self._password = Human.hashing(password)
+        self.creation_date = datetime.now()
         self.cvv2 = random.randint(1111, 9999)
         
     @staticmethod
@@ -108,6 +108,9 @@ class BankAccount:
         Args:
             password (str): Inputed password.
         """
+        if not Human.password_check(password):
+            raise custom_exceptions.ShortPasswordError("Too short Password! ")
+        password = Human.hashing(password)
         self._password = password
 
     def deposit(self, amount: int):
@@ -167,7 +170,7 @@ class BankAccount:
         BankAccount.accounts_dict.update(
             {new_account.national_id: new_account.__dict__}
         )
-        human.Human.json_save("bank_accounts.json", BankAccount.accounts_dict)
+        Human.json_save("bank_accounts.json", BankAccount.accounts_dict)
 
     def __str__(self) -> str:
         """Cutomize print output of object."""
