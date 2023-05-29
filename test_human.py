@@ -92,10 +92,10 @@ class TestUser(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.dirpath = pathlib.Path("./database")
+        cls.dirpath = pathlib.Path("./test_database")
         os.mkdir(TestUser.dirpath)
-        cls.filepath = pathlib.Path("./database/users.json")
-        Human.json_create(TestUser.filepath)
+        User.jsonpath = pathlib.Path("./test_database/users.json")
+        Human.json_create(User.jsonpath)
 
     def setUp(self):
         self.user1 = User(
@@ -142,7 +142,7 @@ class TestUser(unittest.TestCase):
             self.user2.edit_user("bavaar")
         self.user1.edit_user("matin_ghane", "09365181897")
         self.user2.edit_user("", "09122222222")
-        User.dictionary = Human.json_import(TestUser.filepath)
+        User.dictionary = Human.json_import(User.jsonpath)
         self.assertEqual(
             User.dictionary[self.user1.username]["_username"], "matin_ghane"
         )
@@ -161,7 +161,7 @@ class TestUser(unittest.TestCase):
         with self.assertRaises(ShortPasswordError):
             self.user1.password_change("12345", "ma", "ma")
         self.user1.password_change("12345", "matinghane", "matinghane")
-        User.dictionary = Human.json_import(TestUser.filepath)
+        User.dictionary = Human.json_import(User.jsonpath)
         self.assertEqual(
             User.dictionary[self.user1.username]["_User__password"],
             Human.hashing("matinghane"),
@@ -186,10 +186,10 @@ class TestAdmin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.dirpath = pathlib.Path("./database")
+        cls.dirpath = pathlib.Path("./test_database")
         os.mkdir(TestAdmin.dirpath)
-        cls.filepath = pathlib.Path("./database/admins.json")
-        Human.json_create(TestAdmin.filepath)
+        Admin.jsonpath = pathlib.Path("./test_database/admins.json")
+        Human.json_create(Admin.jsonpath)
 
     def setUp(self):
         self.admin1 = Admin("saman", "qwerty")
@@ -229,7 +229,7 @@ class TestAdmin(unittest.TestCase):
         with self.assertRaises(RepUserError):
             self.admin2.edit_user("saman")
         self.admin1.edit_user("matin_ghane")
-        Admin.dictionary = Human.json_import(TestAdmin.filepath)
+        Admin.dictionary = Human.json_import(Admin.jsonpath)
         self.assertEqual(
             Admin.dictionary[self.admin1.username]["_username"], "matin_ghane"
         )
@@ -242,7 +242,7 @@ class TestAdmin(unittest.TestCase):
         with self.assertRaises(ShortPasswordError):
             self.admin1.password_change("qwerty", "sa", "sa")
         self.admin1.password_change("qwerty", "saman", "saman")
-        Admin.dictionary = Human.json_import(TestAdmin.filepath)
+        Admin.dictionary = Human.json_import(Admin.jsonpath)
         self.assertEqual(
             Admin.dictionary[self.admin1.username]["_Admin__password"],
             Human.hashing("saman"),
