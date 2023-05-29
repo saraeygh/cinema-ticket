@@ -2,15 +2,16 @@
 
 import unittest
 import os
-import json
 import shutil
 import pathlib
 from human import Human, User, Admin
 from custom_exceptions import (
-        FileError, PasswordError,
-        UserError, TwoPasswordError,
-        RepUserError, ShortPasswordError
-        )
+    PasswordError,
+    UserError,
+    TwoPasswordError,
+    RepUserError,
+    ShortPasswordError,
+)
 
 
 class TestHuman(unittest.TestCase):
@@ -51,14 +52,15 @@ class TestHuman(unittest.TestCase):
         Human abstract class Testing
         """
         with self.assertRaises(TypeError):
-            human1 = Human("Matin", "Ghane", "bavaar",
-                           "matinghane", "1999/11/20")
+            Human("Matin", "Ghane", "bavaar", "matinghane", "1999/11/20")
 
     def test_hashing(self):
         """
         hashing static method Testing
         """
-        res = "f3cce486ea320015c8e0ffae7cfda6bc2c449a8980b1fb4c632703a70a998246"
+        res = "f3cce486ea320015c8e0ffae7cf"\
+              "da6bc2c449a8980b1fb4c632703a70a998246"
+
         self.assertEqual(Human.hashing("matin"), res)
 
     def test_username_check(self):
@@ -87,18 +89,21 @@ class TestUser(unittest.TestCase):
     This test class is for testing User class/
     methods and functionality
     """
+
     @classmethod
     def setUpClass(cls):
-        cls.dirpath = "./test_database"
-        cls.filepath = "./test_database/test.json"
-        os.makedirs("./test_database")
-        Human.json_create(TestHuman.filepath)
-    
+        cls.dirpath = pathlib.Path("./database")
+        os.mkdir(TestUser.dirpath)
+        cls.filepath = pathlib.Path("./database/users.json")
+        Human.json_create(TestUser.filepath)
+
     def setUp(self):
-        self.user1 = User("Matin", "Ghane", "bavaar", "12345",
-                          "1999/11/20", "09197951537")
-        self.user2 = User("Ali", "Alikhani", "aliii",
-                          "qwerty", "1997/10/03", "09121111111")
+        self.user1 = User(
+            "Matin", "Ghane", "bavaar", "12345", "1999/11/20", "09197951537"
+        )
+        self.user2 = User(
+            "Ali", "Alikhani", "aliii", "qwerty", "1997/10/03", "09121111111"
+        )
 
     def test_get_obj(self):
         with self.assertRaises(UserError):
@@ -126,29 +131,51 @@ class TestUser(unittest.TestCase):
 
     def test_signup(self):
         with self.assertRaises(RepUserError):
-            User("Ali", "Alikhani", "bavaar",
-                 "12345", "1999/10/18", "09365181897")
+            User("Ali", "Alikhani", "bavaar", "12345",
+                 "1999/10/18", "09365181897")
         with self.assertRaises(ShortPasswordError):
-            User("mamad", "hosseini", "mamadi",
-                 "mam", "1997/03/25", "09122222222")
+            User("mamad", "hosseini", "mamadi", "mam",
+                 "1997/03/25", "09122222222")
 
     def test_edit_user(self):
         with self.assertRaises(RepUserError):
             self.user2.edit_user("bavaar")
-
         self.user1.edit_user("matin_ghane", "09365181897")
+        self.user2.edit_user("", "09122222222")
+        User.dictionary = Human.json_import(TestUser.filepath)
+        self.assertEqual(
+            User.dictionary[self.user1.username]["_username"], "matin_ghane"
+        )
+        self.assertEqual(
+            User.dictionary[self.user1.username]["phone_number"], "09365181897"
+        )
+        self.assertEqual(
+            User.dictionary[self.user2.username]["phone_number"], "09122222222"
+        )
 
-
+    def test_password_change(self):
+        with self.assertRaises(PasswordError):
+            self.user1.password_change("54321", "matinghane", "matinghane")
+        with self.assertRaises(TwoPasswordError):
+            self.user2.password_change("qwerty", "mrali", "mralii")
+        with self.assertRaises(ShortPasswordError):
+            self.user1.password_change("12345", "ma", "ma")
+        self.user1.password_change("12345", "matinghane", "matinghane")
+        User.dictionary = Human.json_import(TestUser.filepath)
+        self.assertEqual(
+            User.dictionary[self.user1.username]["_User__password"],
+            Human.hashing("matinghane"),
+        )
 
     def tearDown(self):
         User.all_usernames.clear()
         User.dictionary.clear()
         del self.user1
+        del self.user2
 
     @classmethod
     def tearDownClass(cls):
-        mydir = pathlib.Path("./test_database")
-        shutil.rmtree(mydir)
+        shutil.rmtree(TestUser.dirpath)
 
 
 class TestAdmin(unittest.TestCase):
@@ -156,7 +183,80 @@ class TestAdmin(unittest.TestCase):
     This test class is for testing Admin class/
     methods and functionality
     """
-    pass
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dirpath = pathlib.Path("./database")
+        os.mkdir(TestAdmin.dirpath)
+        cls.filepath = pathlib.Path("./database/admins.json")
+        Human.json_create(TestAdmin.filepath)
+
+    def setUp(self):
+        self.admin1 = Admin("saman", "qwerty")
+        self.admin2 = Admin("matin", "12345")
+
+    def test_get_obj(self):
+        with self.assertRaises(UserError):
+            Admin.get_obj("Ali", "qwerty")
+        Admin.all_usernames.remove(self.admin1.username)
+        Admin.all_usernames.remove(self.admin2.username)
+        admin2 = Admin.get_obj("matin", "12345")
+        admin3 = Admin.get_obj("saman", "qwerty")
+        test_dict = {admin2.username: admin2.__dict__,
+                     admin3.username: admin3.__dict__}
+        self.assertEqual(Admin.dictionary, test_dict)
+
+    def test_sign_in_validation(self):
+        with self.assertRaises(UserError):
+            Admin.sign_in_validation("ali", "123456")
+        with self.assertRaises(PasswordError):
+            Admin.sign_in_validation("matin", "matinghane")
+        Admin.all_usernames.remove(self.admin1.username)
+        Admin.all_usernames.remove(self.admin2.username)
+        admin2 = Admin.sign_in_validation("matin", "12345")
+        admin3 = Admin.sign_in_validation("saman", "qwerty")
+        test_dict = {admin2.username: admin2.__dict__,
+                     admin3.username: admin3.__dict__}
+        self.assertEqual(Admin.dictionary, test_dict)
+
+    def test_signup(self):
+        with self.assertRaises(RepUserError):
+            Admin("matin", "matinghane")
+        with self.assertRaises(ShortPasswordError):
+            Admin("mamad", "mam")
+
+    def test_edit_user(self):
+        with self.assertRaises(RepUserError):
+            self.admin2.edit_user("saman")
+        self.admin1.edit_user("matin_ghane")
+        Admin.dictionary = Human.json_import(TestAdmin.filepath)
+        self.assertEqual(
+            Admin.dictionary[self.admin1.username]["_username"], "matin_ghane"
+        )
+
+    def test_password_change(self):
+        with self.assertRaises(PasswordError):
+            self.admin1.password_change("ytrewq", "saman", "saman")
+        with self.assertRaises(TwoPasswordError):
+            self.admin2.password_change("12345", "matinghane", "matinghan")
+        with self.assertRaises(ShortPasswordError):
+            self.admin1.password_change("qwerty", "sa", "sa")
+        self.admin1.password_change("qwerty", "saman", "saman")
+        Admin.dictionary = Human.json_import(TestAdmin.filepath)
+        self.assertEqual(
+            Admin.dictionary[self.admin1.username]["_Admin__password"],
+            Human.hashing("saman"),
+        )
+
+    def tearDown(self):
+        Admin.all_usernames.clear()
+        Admin.dictionary.clear()
+        del self.admin1
+        del self.admin2
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(TestAdmin.dirpath)
 
 
 def main():
