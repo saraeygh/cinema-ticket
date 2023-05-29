@@ -2,6 +2,7 @@
 /admins.json
 /users.json
 /bank_accounts.json
+/test.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
