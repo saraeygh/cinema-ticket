@@ -1,3 +1,4 @@
+import os
 import random
 from human import Human, User
 from datetime import datetime
@@ -52,7 +53,7 @@ class BankAccount:
         self.last_name = last_name
         self._balance = balance
         self._password = Human.hashing(password)
-        self.creation_date = datetime.now()
+        self.creation_date = str(datetime.now())
         self.cvv2 = random.randint(1111, 9999)
         
     @staticmethod
@@ -170,7 +171,8 @@ class BankAccount:
         BankAccount.accounts_dict.update(
             {new_account.national_id: new_account.__dict__}
         )
-        Human.json_save("bank_accounts.json", BankAccount.accounts_dict)
+        os.makedirs(os.path.dirname("./database/bank_accounts.json"), exist_ok=True)
+        Human.json_save("./database/bank_accounts.json", BankAccount.accounts_dict)
 
     def __str__(self) -> str:
         """Cutomize print output of object."""
@@ -186,6 +188,6 @@ class BankAccount:
     
 def main():
     pass
-
+    
 if __name__ == "__main__":
     main()
