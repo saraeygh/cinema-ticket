@@ -1,21 +1,18 @@
 #! /usr/bin/python3
 
 import unittest
-import os
-import shutil
-import pathlib
 from bank_accounts import BankAccount
 from custom_exceptions import BalanceMinimum
+from human import Human
 
 
 class TestBankAccount(unittest.TestCase):
-    
- 
-    def test_national_id_valid(self) -> bool:
+
+    def test_national_id_valid(self):
         valid_id = "2210010098"
         invalid_id = "221001098"
-        self.assertEqual(BankAccount.national_id_valid(valid_id), True)
-        self.assertEqual(BankAccount.national_id_valid(invalid_id), False)
+        self.assertTrue(BankAccount.national_id_valid(valid_id))
+        self.assertFalse(BankAccount.national_id_valid(invalid_id))
 
     def test_deposit(self):
         account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
@@ -25,13 +22,36 @@ class TestBankAccount(unittest.TestCase):
         
         account2 = BankAccount("2210000344", "Reza", "Saraey", 50_000, "1234")
         deposit_amount = -45_000
-        self.assertRaises(account2.deposit(deposit_amount), BalanceMinimum)
-        
-        
-        # if self._balance + amount < self.MIN_BALANCE:
-        #     raise custom_exceptions.BalanceMinimum("Invalid balance.")
-        # self._balance += amount
+        with self.assertRaises(BalanceMinimum):
+            account2.deposit(deposit_amount)
 
+    def test_withdraw(self):
+        account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
+        withdraw_amount = 50_000
+        account1.withdraw(withdraw_amount)
+        self.assertEqual(account1.balance, 50_000)
+        
+        account2 = BankAccount("2210000344", "Reza", "Saraey", 50_000, "1234")
+        withdraw_amount = 45_000
+        with self.assertRaises(BalanceMinimum):
+            account2.withdraw(withdraw_amount)
+
+    def test_transfer(self):
+        account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
+        account2 = BankAccount("2210000344", "Matin", "ghane", 50_000, "1234")
+        transfer_amount = 10_000
+        account1.transfer(account2, transfer_amount)
+        self.assertEqual(account1.balance, 90_000)
+        self.assertEqual(account2.balance, 60_000)
+
+    def test_create_account(self):
+        BankAccount.create_account("2210240300", "reza", "saraey", 10_000, "1234")
+        data = Human.json_import("./database/bank_accounts.json")
+        print(data["2210240300"])
+        self.assertEqual(data["2210240300"]["national_id"], "2210240300")
+        self.assertEqual(data["2210240300"]["first_name"], "reza")
+        self.assertEqual(data["2210240300"]["last_name"], "saraey")
+        self.assertEqual(data["2210240300"]["_balance"], 10_000)
 
 def main():
     """
