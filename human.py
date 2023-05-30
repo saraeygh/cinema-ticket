@@ -5,15 +5,16 @@ from datetime import datetime
 import uuid
 import hashlib
 import json
+import os
 import pathlib
 from custom_exceptions import (
     UserError,
     RepUserError,
     ShortPasswordError,
     PasswordError,
-    TwoPasswordError,
+    TwoPasswordError
 )
-
+#import BankAccount
 
 class Human(ABC):
     """
@@ -23,16 +24,10 @@ class Human(ABC):
 
     all_usernames = []
 
-    def __init__(
-        self,
-        fname: str,
-        lname: str,
-        username: str,
-        password: str,
-        birth_date: str,
-        phone_number: str = None,
-        user_id: str = None,
-    ):
+    def __init__(self, fname: str, lname: str,
+                 username: str, password: str,
+                 birth_date: str, phone_number: str = None,
+                 user_id: str = None):
         self.fname, self.lname = fname, lname
         self.username, self.password = username, password
         if user_id is None:
@@ -47,7 +42,7 @@ class Human(ABC):
         """
         This method is for hashing passwords
         """
-        hashed_pass = hashlib.sha256(password.encode("utf-8")).hexdigest()
+        hashed_pass = (hashlib.sha256(password.encode("utf-8")).hexdigest())
         return hashed_pass
 
     @staticmethod
@@ -209,31 +204,23 @@ class User(Human):
     also user can enter his/her phone number and if phone number not entered,
      it assuming to None
     """
-
     jsonpath = pathlib.Path("./database/users.json")
     all_usernames = []
     dictionary = {}
 
     def __init__(
-        self,
-        fname: str,
-        lname: str,
-        username: str,
-        password: str,
-        birth_date: str,
-        phone_number: str = None,
-        user_id: str = None,
-        join_date: str = None,
-        current_plan: str = None,
-        wallet=None,
-        bank_accounts: list = None,
-    ) -> None:
+            self, fname: str, lname: str,
+            username: str, password: str,
+            birth_date: str, phone_number: str = None,
+            user_id: str = None, join_date: str = None,
+            current_plan: str = None, wallet=None,
+            bank_accounts: list = None
+            ) -> None:
         """
         The __init__ method for assigning attributes
         """
-        super().__init__(
-            fname, lname, username, password, birth_date, phone_number, user_id
-        )
+        super().__init__(fname, lname, username, password,
+                         birth_date, phone_number, user_id)
 
         if join_date is None:
             self.join_date = str(datetime.now())
@@ -260,30 +247,99 @@ class User(Human):
             User.dictionary.update({self.username: self.__dict__})
             Human.json_save(User.jsonpath, User.dictionary)
 
-    def reserve(self, ticket, time, etc):
+
+    def apply_discount(self, price: float, discount_percent: float) -> float:
+        return price * (1 - discount_percent)
+
+
+    def reserve_ticket(self, ticket_date, movie_age_group, movie_release_date, username, cinema_capacity) -> bool:
         """
         Implement ticket reserve here
         """
-        pass
+        from math import floor
 
-    def change_plan(self, old_plan, new_plan):
+        user_birthday = User.dictionary[username]["birth_date"]
+        date_delta = datetime.now() - datetime(user_birthday)
+        user_age = floor(date_delta.days / 365)
+
+        if movie_age_group > user_age:
+            return False
+
+        if datetime(ticket_date) > datetime(movie_release_date):
+            return False
+        
+        if cinema_capacity < 1:
+            return False
+
+        return True
+
+
+    def show_plans(self):
+        """
+        Show User's Plans here
+        """
+        return {
+            "Silver plan": {"price": "100000", "discount": "20%"},
+            "Gold plan": {"price": "500000", "discount": "50%"}
+        }
+
+    def change_plan(self, username: str, new_plan: str):
         """
         Implement User Change Plan here
         """
-        pass
 
-    def add_bank(self, account_id):
+        self.current_plan = new_plan
+
+        if new_plan == "Silver":
+            User.dictionary[username]["current_plan"] = "Silver"
+        elif new_plan == "Gold":
+            User.dictionary[username]["current_plan"] = "Gold"
+        else:
+            User.dictionary[username]["current_plan"] = "Bronze"
+
+        User.json_save(User.jsonpath, User.dictionary)
+
+    def add_bank_account(self, national_id, account_number,fname, lname, balance, password, username):
         """
         Implement Add bank account to/
         User bank accounts list here
         """
-        pass
+        new_bank_account = {
+            "national_id": national_id,
+            "fname": fname,
+            "lname": lname,
+            "balance": balance,
+            "password": password,
+            "account_number":account_number
+        }
 
-    def discount(self, days_from_join):
+        User.dictionary[username]["bank_accounts"].append(new_bank_account)
+        
+        User.json_save(User.jsonpath, User.dictionary)
+        
+
+    def charge_wallet(self, username, account_number):
+        for account in User.dictionary[username]["bank_accounts"]:
+            if account_number == account["account_number"]:
+                return account
+
+    def compute_discount(self, username: str, price: float, ticket_date: str):
         """
         Implement apply discount here
         """
-        pass
+
+        from math import floor
+
+        user_join_date = User.dictionary[username]["join_date"]
+        date_delta = datetime(ticket_date) - datetime(user_join_date)
+        user_membership_month = floor(date_delta.days / 30)
+
+        user_birthday = User.dictionary[username]["birth_date"]
+
+        if user_birthday == ticket_date:
+            price = User.apply_discount(price, 0.5)
+
+        return User.apply_discount(price, ((user_membership_month*5)/100))
 
     @classmethod
     def get_obj(cls, username, password):
@@ -300,18 +356,10 @@ class User(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(
-                    j["fname"],
-                    j["lname"],
-                    j["_username"],
-                    password,
-                    j["birth_date"],
-                    j["phone_number"],
-                    j["user_id"],
-                    j["join_date"],
-                    j["current_plan"],
-                    j["wallet"],
-                    j["bank_accounts"],
-                )
+                        j["fname"], j["lname"], j["_username"], password,
+                        j["birth_date"], j["phone_number"], j["user_id"],
+                        j["join_date"], j["current_plan"], j["wallet"],
+                        j["bank_accounts"])
 
     def __str__(self):
         """
@@ -342,21 +390,17 @@ class User(Human):
         return usr_obj
 
     @classmethod
-    def signup(
-        cls,
-        first_name: str,
-        last_name: str,
-        user_name: str,
-        password: str,
-        birth_date: str,
-        ph_numb: str = None,
-    ):
+    def signup(cls, first_name: str, last_name: str,
+               user_name: str, password: str,
+               birth_date: str, ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
         and finally enter phone number
         """
-        obj = cls(first_name, last_name, user_name, password, birth_date, ph_numb)
+        obj = cls(first_name, last_name,
+                  user_name, password,
+                  birth_date, ph_numb)
         return obj
 
     def edit_user(self, usr_name: str = None, ph_numb: str = None):
@@ -437,7 +481,6 @@ class Admin(Human):
     This class is for modeling Admins and/
     inherites from Human Abstract user.
     """
-
     all_usernames = []
     dictionary = {}
     jsonpath = pathlib.Path("./database/admins.json")
@@ -468,12 +511,12 @@ class Admin(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(j["_username"], password, j["user_id"])
-
-    @staticmethod
-    def add_show(quantity):
+    
+    def add_show(self):
         """
         Implementing add a show here
         """
+        pass
 
     def remove_film(self):
         """
