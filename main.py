@@ -67,77 +67,66 @@ while 1:
 
                 while 1:
                     print("\n************ - User Dashboard - ************\n")
-                    stat = input("Stat (1(Show User Information) - 2(Edit)\
-                            - 3(Show Tickets menu) - 4(Reserve Ticket)\
-                            - 5(Cahrge Wallet) - 6(Back to Main Menu)):   ")
+                    stat = input("Stat (1(Show User Information) - 2(Edit) - 3(Show Tickets menu) - 4(Reserve Ticket) - 5(Cahrge Wallet) - 6(Back to Main Menu)):   ")
                     if stat == "1":
                         print(user_object)
                         print("List of Bank Accounts:")
-
+                    
                     elif stat == "2":
-                        print("\n***** ^ Edit User mode ^ *****\n")
-                        stat = input("Stat 1(Edit profile)\
-                                - 2(Password Change)\
-                                - 3(Show Current Plan)\
-                                - 4(Change Plan)\
-                                - 5(Edit Bank Accounts)   ")
-
-                        if stat == "1":
-                            print("\n***** ^ Edit Profile mode ^ *****\n")
-                            print("For Abort to editing any item,\
-                                    just leavi it and press Enter.")
-                            new_fname = input("Enter New First Name: ")
-                            new_lname = input("Enter New Last Name: ")
-                            year, month, day = input("Enter New Birth Date\
-                                    (YYYY-MM-DD): ")
-                            new_b_date = datetime.date(int(year),
-                                                       int(month),
-                                                       int(day)).isoformat()
-                            new_usr = input("Enter New Username: ")
-                            new_ph_numb = input("New Phone Number: ")
-                            try:
-                                user_object.edit_user(new_fname, new_lname,
-                                                      new_usr, new_ph_numb,
-                                                      new_b_date)
-                            except RepUserError:
-                                print("\nUsername already Taken! ")
-                            else:
-                                print("\nUser Information has been Updated! ")
-
-                        elif stat == "2":
-                            print("\n********** ^ Password\
-                                    Change ^ **********\n")
-                            old_p = getpass("Old Password: ")
-                            new_p = getpass("New Password: ")
-                            re_new_p = getpass("New Password again: ")
-                            try:
-                                user_object.password_change(old_p,
-                                                            new_p, re_new_p)
-                            except PasswordError:
-                                print("\nWrong Original Password! ")
-                            except TwoPasswordError:
-                                print("\nTwo new passwords are not matched! ")
-                            except ShortPasswordError:
-                                print("Two Short New Password! ")
-                            else:
-                                print("\nYour Password has been changed! ")
-
-                        elif stat == "3":
-                            print("***** ^ Show Current Plan ^ *****")
-
-                        elif stat == "4":
-                            print("***** ^ Change Plan ^ *****")
-
-                        elif stat == "5":
-                            print("***** ^ Edit Bank Accounts ^ *****")
-                            print("Stat 1(Add a Bank Account -\
-                                    2(Edit Bank Accounts))")
+                        while 1:
+                            print("\n***** ^ Edit User mode ^ *****\n")
+                            stat = input("Stat 1(Edit profile) - 2(Password Change) - 3(Show Current Plan) - 4(Change Plan) - 5(Edit Bank Accounts) - 6(Back to Dashboard)   ")
+    
                             if stat == "1":
-                                print("***** ^ Add Bank Account ^ *****")
-
+                                print("\n***** ^ Edit Profile mode ^ *****\n")
+                                print("For Abort to editing any item, just leave it and press Enter.")
+                                new_fname = input("Enter New First Name: ")
+                                new_lname = input("Enter New Last Name: ")
+                                new_b_date = input("Enter New Birth Date (YYYY-MM-DD): ")
+                                new_usr = input("Enter New Username: ")
+                                new_ph_numb = input("New Phone Number: ")
+                                try:
+                                    user_object.edit_user(new_fname, new_lname,
+                                                          new_usr, new_ph_numb,
+                                                          new_b_date)
+                                except RepUserError:
+                                    print("\nUsername already Taken! ")
+                                else:
+                                    print("\nUser Information has been Updated! ")
+    
                             elif stat == "2":
+                                print("\n******** ^ Password Change ^ ********\n")
+                                old_p = getpass("Old Password: ")
+                                new_p = getpass("New Password: ")
+                                re_new_p = getpass("New Password again: ")
+                                try:
+                                    user_object.password_change(old_p,
+                                                                new_p, re_new_p)
+                                except PasswordError:
+                                    print("\nWrong Original Password! ")
+                                except TwoPasswordError:
+                                    print("\nTwo new passwords are not matched! ")
+                                except ShortPasswordError:
+                                    print("Two Short New Password! ")
+                                else:
+                                    print("\nYour Password has been changed! ")
+    
+                            elif stat == "3":
+                                print("***** ^ Show Current Plan ^ *****")
+    
+                            elif stat == "4":
+                                print("***** ^ Change Plan ^ *****")
+    
+                            elif stat == "5":
                                 print("***** ^ Edit Bank Accounts ^ *****")
-
+                                print("Stat 1(Add a Bank Account -\
+                                        2(Edit Bank Accounts))")
+                                if stat == "1":
+                                    print("***** ^ Add Bank Account ^ *****")
+    
+                                elif stat == "2":
+                                    print("***** ^ Edit Bank Accounts ^ *****")
+    
                     elif stat == "3":
                         print("***** ^ Ticket Menu ^ *****")
 
@@ -196,9 +185,7 @@ while 1:
 
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
-                    stat = input("Stat (1(Add film) - 2(Remove film)\
-                            - 3(Show Your Information) - 4(Edit Username)\
-                            - 5(Password Change) - 6(Back to Main Menu)):   ")
+                    stat = input("Stat (1(Add film) - 2(Remove film) - 3(Show Your Information) - 4(Edit Username) - 5(Password Change) - 6(Back to Main Menu)):   ")
                     if stat == "1":
                         print("\n************** ^ Add film ^ **************\n")
                         film_name = input("Enter Film name: ")
