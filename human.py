@@ -14,7 +14,7 @@ from custom_exceptions import (
     PasswordError,
     TwoPasswordError
 )
-from bank_accounts import create_account
+import BankAccount
 
 class Human(ABC):
     """
