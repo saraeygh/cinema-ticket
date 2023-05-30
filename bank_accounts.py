@@ -3,6 +3,24 @@ import random
 from human import Human
 from datetime import datetime
 import custom_exceptions
+import logging
+
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(message)s")
+
+os.makedirs(os.path.dirname("./log/bank_accounts.log"), exist_ok=True)
+file_handler = logging.FileHandler("./log/bank_accounts.log")
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 """
 Imported random to generate CVV2.
@@ -47,7 +65,9 @@ class BankAccount:
         """
         if BankAccount.national_id_valid(national_id):
             self.national_id = national_id
+            logger.info(f"{self.national_id} was valid.")
         else:
+            logger.debug(f"{self.national_id} was not valid.")
             raise custom_exceptions.InvalidNationalID("Invalid ID.")
         self.first_name = first_name
         self.last_name = last_name
@@ -167,12 +187,13 @@ class BankAccount:
             balance (float): User inputed balance.
             password (str): User inputed password.
         """
+        filename = "./database/bank_accounts.json"
         new_account = BankAccount(national_id, first_name, last_name, balance, password)
-        if not os.path.exists("./database/bank_accounts.json"):
-            Human.json_create("./database/bank_accounts.json")
-        data = Human.json_import("./database/bank_accounts.json")
+        if not os.path.exists(filename):
+            Human.json_create(filename)
+        data = Human.json_import(filename)
         data.update({new_account.national_id: new_account.__dict__})
-        Human.json_save("./database/bank_accounts.json", data)
+        Human.json_save(filename, data)
 
     def __str__(self) -> str:
         """Cutomize print output of object."""
@@ -187,6 +208,7 @@ class BankAccount:
         """
     
 def main():
+    BankAccount("22102403244", "first_name", "last_name", 10_000, "password")
     pass
     
 if __name__ == "__main__":

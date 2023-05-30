@@ -1,4 +1,5 @@
 database/
+log/
 /database.json
 /admins.json
 /users.json
