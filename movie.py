@@ -1,50 +1,46 @@
+#! /usr/bin/python3
+
 import datetime
 import json
 import os
-from zoneinfo import available_timezones
 
 class Film:
     """
-    
     """
-    def __init__(self, name: str, genre: str, age_rating: str, tickets: dict = {}):
+    def __init__(self, name: str, genre: str, age_rating: str, tickets: dict):
         self.name = name
         self.genre = genre
         self.age_rating = age_rating
         self.tickets = tickets
         Film.films.update({self.name: self.__dict__})
-        
+
     films = {}
 
     @classmethod
     def load_films_from_json(cls):
-        #try:
-        with open("database.json", 'r') as file:
+        with open("database.json", mode="r", encoding="utf-8") as file:
             return json.load(file)
-        #except FileNotFoundError:
-        #    self.films = {}
 
     @classmethod
     def save_films_to_json(cls, dictionary):
-        with open("database.json", 'w+') as file:
+        with open("database.json", mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @classmethod
     def add_film(cls, name: str, genre: str, age_rating: str, scene_date, showtime, capacity):
-        film = cls(name, genre, age_rating)
-        ticket = Ticket(name, scene_date, showtime, capacity)
+        cls(name, genre, age_rating, Ticket.ticket_dict)
+        Ticket(name, scene_date, showtime, capacity)
 
-     
     @classmethod
     def get_object(cls, name):
         for i, j in Film.films.items():
             if i == name:
                 return cls(j["name"],
-                            j["genre"],
-                            j["age_rating"],
-                            j["scene_date"],
-                            j["scene_time"],
-                            j["capacity"])
+                           j["genre"],
+                           j["age_rating"],
+                           j["scene_date"],
+                           j["scene_time"],
+                           j["capacity"])
 
     @classmethod   
     def remove_film(cls, name: str):
@@ -56,17 +52,18 @@ class Film:
 
 
 class Ticket(Film):
+
     ticket_dict = {}
+
     def __init__(self, name, scene_date, showtime, capacity):
-        #super().__init__(name, genre, age_rating)
         self.name = name
         self.scene_date = scene_date
         self.showtime = showtime
         self.available_seats = capacity
         Ticket.ticket_dict.update({f"{self.scene_date} _ {self.showtime}": self.__dict__})
-        for film in Film.films:
+        for film, info in Film.films.items():
             if film == self.name:
-                Film.films[film]["tickets"] = Ticket.ticket_dict
+                info["tickets"] = Ticket.ticket_dict
         Film.save_films_to_json(Film.films)
 
     @staticmethod
@@ -83,6 +80,7 @@ class Ticket(Film):
         else:
             print("Insufficient available seats.")
 
+
 while True:
     if os.path.isfile("database.json"):
         Film.films = Film.load_films_from_json()
@@ -96,18 +94,19 @@ while True:
     choice = int(input("Enter your choice: "))
 
     if choice == 1:
-        name = input("Enter film name: ")
-        genre = input("Enter film genre (Comedy / Action / Family / Romance): ")
-        age_rating = int(input("Enter film age rating: "))
-        year, month, day = input("Enter the scene_date of release of the movie: ").split("-")
-        scene_date = datetime.date(int(year), int(month), int(day)).isoformat()
-        hour , minute = input("Enter hour and minute: ").split(":")
+        film_name = input("Enter film name: ")
+        film_genre = input("Enter film genre (Comedy/Action/Family/Romance): ")
+        age_rate = int(input("Enter film age rating: "))
+        year, month, day = input("Enter the scene_date: ").split("-")
+        film_date = datetime.date(int(year), int(month), int(day)).isoformat()
+        hour, minute = input("Enter scene time: ").split(":")
         scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
-        
-        capacity = int(input("Enter the capacity of the movie theater: "))
 
-        Film.add_film(name, genre, age_rating, scene_date, scene_time, capacity)
-       
+        ticket_capacity = int(input("Enter the scene capacity: "))
+
+        Film.add_film(film_name, film_genre, age_rate,
+                      film_date, scene_time, ticket_capacity)
+
         print("Film added successfully!")
         print()
     elif choice == 2:
@@ -120,5 +119,3 @@ while True:
     else:
         print("Invalid choice. Please try again.")
         print()
-
-        
