@@ -6,6 +6,7 @@ import os
 
 class Film:
     """
+    This class is for modeling film.
     """
     def __init__(self, name: str, genre: str, age_rating: str, tickets: dict):
         self.name = name
@@ -18,32 +19,53 @@ class Film:
 
     @classmethod
     def load_films_from_json(cls):
-        with open("database.json", mode="r", encoding="utf-8") as file:
+        """
+        This class method is for loading our films and\
+                tickets data in the dictionary\
+                from a json file called database/films.json
+        """
+        with open("database/films.json", mode="r", encoding="utf-8") as file:
             return json.load(file)
 
     @classmethod
     def save_films_to_json(cls, dictionary):
-        with open("database.json", mode="w+", encoding="utf-8") as file:
+        """
+        This class method is for saving our films and\
+                tickets data in the dictionary\
+                into a json file called database/films.json
+        """
+        with open("database/films.json", mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @classmethod
-    def add_film(cls, name: str, genre: str, age_rating: str, scene_date, showtime, capacity):
+    def add_film(cls, name: str, genre: str,
+                 age_rating: str, scene_date, showtime, capacity):
+        """
+        This class method is for adding a film and its ticket.
+        """
         cls(name, genre, age_rating, Ticket.ticket_dict)
         Ticket(name, scene_date, showtime, capacity)
 
     @classmethod
     def get_object(cls, name):
+        """
+        This class method is for getting the film name\
+                and creating a object from that information\
+                for us.
+        """
         for i, j in Film.films.items():
             if i == name:
                 return cls(j["name"],
                            j["genre"],
                            j["age_rating"],
-                           j["scene_date"],
-                           j["scene_time"],
-                           j["capacity"])
+                           j["tickets"])
 
-    @classmethod   
+    @classmethod
     def remove_film(cls, name: str):
+        """
+        This class method is for removing\
+                a film fro our database.
+        """
         for film in Film.films:
             if film == name:
                 del Film.films[name]
@@ -52,6 +74,9 @@ class Film:
 
 
 class Ticket(Film):
+    """
+    This class is for modeling Ticket
+    """
 
     ticket_dict = {}
 
@@ -68,9 +93,18 @@ class Ticket(Film):
 
     @staticmethod
     def add_ticket(name, scene_date, showtime, capacity):
+        """
+        This method is for adding a ticket from a defined film
+        """
         return Ticket(name, scene_date, showtime, capacity)
 
     def sell_ticket(self, quantity):
+        """
+        This method is for seeling ticket\
+                taking us count and substraction this\
+                count from our total quantity of that\
+                ticket
+        """
         if quantity <= self.available_seats:
             self.available_seats -= quantity
             Ticket.ticket_dict["capacity"] = self.available_seats
@@ -110,8 +144,8 @@ while True:
         print("Film added successfully!")
         print()
     elif choice == 2:
-        name = input("Enter film name to remove: ")
-        Film.remove_film(name)
+        film_name = input("Enter film name to remove: ")
+        Film.remove_film(film_name)
         print("Film removed successfully!")
         print()
     elif choice == 3:
