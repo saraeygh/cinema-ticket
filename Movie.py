@@ -1,11 +1,13 @@
+from abc import ABC, abstractmethod
 import datetime
 import json
 import os
 from zoneinfo import available_timezones
 
-class Film:
+class Film(ABC):
     """
-    
+    A class to define the film, which is conducted by the admin
+
     """
     def __init__(self, name: str, genre: str, age_rating: str, tickets: dict = {}):
         self.name = name
@@ -18,6 +20,9 @@ class Film:
 
     @classmethod
     def load_films_from_json(cls):
+        """
+        Function to load the json file if it exists
+        """
         #try:
         with open("database.json", 'r') as file:
             return json.load(file)
@@ -26,17 +31,30 @@ class Film:
 
     @classmethod
     def save_films_to_json(cls, dictionary):
+        """
+        If the json file does not exist, this function will create a json file
+
+        """
         with open("database.json", 'w+') as file:
             json.dump(dictionary, file, indent=4)
 
+
     @classmethod
     def add_film(cls, name: str, genre: str, age_rating: str, scene_date, showtime, capacity):
+        """
+        A function to add a movie that includes the name, genre, age range, showtime, capacity
+        """
+
         film = cls(name, genre, age_rating)
         ticket = Ticket(name, scene_date, showtime, capacity)
 
      
     @classmethod
     def get_object(cls, name):
+        """
+        Function to create an object from the movie
+        """
+
         for i, j in Film.films.items():
             if i == name:
                 return cls(j["name"],
@@ -48,6 +66,10 @@ class Film:
 
     @classmethod   
     def remove_film(cls, name: str):
+        """
+        Movie delete function
+        """
+
         for film in Film.films:
             if film == name:
                 del Film.films[name]
@@ -71,9 +93,18 @@ class Ticket(Film):
 
     @staticmethod
     def add_ticket(name, scene_date, showtime, capacity):
+        """
+        Function to create ticket for user purchase
+        """
+
         return Ticket(name, scene_date, showtime, capacity)
+    
 
     def sell_ticket(self, quantity):
+        """
+        Function to sell tickets
+        """
+
         if quantity <= self.available_seats:
             self.available_seats -= quantity
             Ticket.ticket_dict["capacity"] = self.available_seats
