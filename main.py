@@ -173,21 +173,9 @@ while 1:
         while 1:
             print("\n******** - admin management panel - ********\n")
             print()
-            stat = input("Stat (0(Exit) - 1(Sign Up) - 2(Sign In)):   ")
+            stat = input("Stat (0(Exit) - 1(Sign In)):   ")
 
             if stat == "1":
-                print("\n********** ^ Sign up form ^ **********\n")
-                username = input("Enter Username: ")
-                password = getpass("Enter Password: ")
-                try:
-                    Admin.signup(username, password)
-                except RepUserError:
-                    print("\nUsername Already Taken! ")
-                except ShortPasswordError:
-                    print("\nToo Short Password! ")
-                else:
-                    print("\nSigning Up Completed! ")
-            elif stat == "2":
                 print("\n************** - Login form - **************\n")
                 try:
                     username = input("Enter Username: ")
@@ -209,7 +197,7 @@ while 1:
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
                     stat = input("Stat (1(Add film) - 2(Remove film)\
-                            - 3(Show User Information) - 4(Edit Profile)\
+                            - 3(Show Your Information) - 4(Edit Username)\
                             - 5(Password Change) - 6(Back to Main Menu)):   ")
                     if stat == "1":
                         print("\n************** ^ Add film ^ **************\n")
@@ -233,16 +221,16 @@ while 1:
                         except FilmError:
                             print("Film with this Name not found for Remove! ")
                         else:
-                            print("film Removed Successfully! ")
+                            print("Film Removed Successfully! ")
 
                     elif stat == "3":
                         print(admin_object)
 
                     elif stat == "4":
-                        print("********** ^ admin Edit profile ^ **********")
+                        print("********** ^ admin Edit Username ^ **********")
                         print("abort change any item, leave it and Enter.\n")
+                        new_username = input("Enter New Username: ")
                         try:
-                            new_username = input("Enter New Username: ")
                             admin_object.edit_user(new_username)
                         except RepUserError:
                             print("\nUsername already Taken! ")
@@ -251,10 +239,10 @@ while 1:
 
                     elif stat == "5":
                         print("\n********** ^ Password Change ^ **********\n")
+                        old_pass = getpass("Enter Old Password: ")
+                        new_pass = getpass("Enter New Password: ")
+                        rep_new_pass = getpass("Enter New Password again: ")
                         try:
-                            old_pass = getpass("Enter Old Password: ")
-                            new_pass = getpass("Enter New Password: ")
-                            rep_new_pass = getpass("Enter New Password again: ")
                             admin_object.password_change(old_pass, new_pass, rep_new_pass)
                         except PasswordError:
                             print("\nWrong Original Password! ")
