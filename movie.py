@@ -1,8 +1,8 @@
 #! /usr/bin/python3
 
-import datetime
 import json
-import os
+from custom_exceptions import FilmError, NoCapacityError
+
 
 class Film:
     """
@@ -67,11 +67,10 @@ class Film:
         This class method is for removing\
                 a film fro our database.
         """
-        for film in Film.films:
-            if film == name:
-                del Film.films[name]
-                cls.save_films_to_json(Film.films)
-                break
+        if name not in Film.films:
+            raise FilmError("Film Not Found! ")
+        del Film.films[name]
+        cls.save_films_to_json(Film.films)
 
 
 class Ticket(Film):
@@ -113,44 +112,4 @@ class Ticket(Film):
             Film.save_films_to_json(Film.films)
             print(f"{quantity} ticket(s) sold successfully.")
         else:
-            print("Insufficient available seats.")
-
-
-while True:
-    if os.path.isfile("database.json"):
-        Film.films = Film.load_films_from_json()
-    else:
-        Film.save_films_to_json({})
-
-    print("1. Add Film")
-    print("2. Remove Film")
-    print("3. Exit")
-
-    choice = int(input("Enter your choice: "))
-
-    if choice == 1:
-        film_name = input("Enter film name: ")
-        film_genre = input("Enter film genre (Comedy/Action/Family/Romance): ")
-        age_rate = int(input("Enter film age rating: "))
-        year, month, day = input("Enter the scene_date: ").split("-")
-        film_date = datetime.date(int(year), int(month), int(day)).isoformat()
-        hour, minute = input("Enter scene time: ").split(":")
-        scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
-
-        ticket_capacity = int(input("Enter the scene capacity: "))
-
-        Film.add_film(film_name, film_genre, age_rate,
-                      film_date, scene_time, ticket_capacity)
-
-        print("Film added successfully!")
-        print()
-    elif choice == 2:
-        film_name = input("Enter film name to remove: ")
-        Film.remove_film(film_name)
-        print("Film removed successfully!")
-        print()
-    elif choice == 3:
-        break
-    else:
-        print("Invalid choice. Please try again.")
-        print()
+            raise NoCapacityError("Insufficient ticket! ")
