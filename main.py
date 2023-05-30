@@ -1,9 +1,9 @@
 #! /usr/bin/python3
 
-from getpass import getpass
-from os import path
-from movie import Film, Ticket
 import datetime
+from getpass import getpass
+import os
+from movie import Film, Ticket
 from custom_exceptions import (
         UserError,
         RepUserError,
@@ -16,27 +16,23 @@ from custom_exceptions import (
 
 from human import Human, User, Admin
 
+if not os.path.isdir("./database"):
+    os.mkdir("./database")
+
 while 1:
     print("\n***** - Welcome to cinema Ticket - *****")
     stat = input("Stat (1(User mode) - 2(Admin mode)) - 0(Exit)   ")
     if stat == "1":
-        if path.exists("./database/users.json"):
+        if os.path.exists("./database/users.json"):
             User.dictionary = Human.json_import("./database/users.json")
         else:
-            Human.json_create("./database/users.json")
+            Human.json_save("./database/users.json", {})
 
         while 1:
             print("\n******** - Welcome to user management panel - ********\n")
             stat = input("Stat (0(Exit) - 1(Sign Up) - 2(Sign In)):   ")
-            if stat == "5":
-                print("***** ^ Secret Admin panel ^ *****")
-                print(User.dictionary.keys(), end="\n\n")
-                for i, j in User.dictionary.items():
-                    print(f"\n{i}")
-                    for m, n in j.items():
-                        print(f"\t{m}:\t{n}")
 
-            elif stat == "1":
+            if stat == "1":
                 print("\n********** ^ Sign up form ^ **********\n")
                 fname = input("Enter First Name: ")
                 lname = input("Enter Last Name: ")
@@ -56,9 +52,9 @@ while 1:
                     print("\nSigning Up Completed! ")
             elif stat == "2":
                 print("\n************** - Login form - **************\n")
+                username = input("Enter Username: ")
+                password = getpass("Enter Password: ")
                 try:
-                    username = input("Enter Username: ")
-                    password = getpass("Enter Password: ")
                     user_object = User.sign_in_validation(username, password)
                 except UserError:
                     print("\nUsername not Found! ")
@@ -72,39 +68,86 @@ while 1:
                 while 1:
                     print("\n************ - User Dashboard - ************\n")
                     stat = input("Stat (1(Show User Information) - 2(Edit)\
-                            - 3(Password Change) - 4(Back to Main Menu)):   ")
+                            - 3(Show Tickets menu) - 4(Reserve Ticket)\
+                            - 5(Cahrge Wallet) - 6(Back to Main Menu)):   ")
                     if stat == "1":
                         print(user_object)
+                        print("List of Bank Accounts:")
 
                     elif stat == "2":
-                        print("\n***** ^ Edit User information mode ^ *****\n")
-                        print("abort change any item, leave it and Enter.\n")
-                        try:
+                        print("\n***** ^ Edit User mode ^ *****\n")
+                        stat = input("Stat 1(Edit profile)\
+                                - 2(Password Change)\
+                                - 3(Show Current Plan)\
+                                - 4(Change Plan)\
+                                - 5(Edit Bank Accounts)   ")
+
+                        if stat == "1":
+                            print("\n***** ^ Edit Profile mode ^ *****\n")
+                            print("For Abort to editing any item,\
+                                    just leavi it and press Enter.")
+                            new_fname = input("Enter New First Name: ")
+                            new_lname = input("Enter New Last Name: ")
+                            year, month, day = input("Enter New Birth Date\
+                                    (YYYY-MM-DD): ")
+                            new_b_date = datetime.date(int(year),
+                                                       int(month),
+                                                       int(day)).isoformat()
                             new_usr = input("Enter New Username: ")
                             new_ph_numb = input("New Phone Number: ")
-                            user_object.edit_user(new_usr, new_ph_numb)
-                        except RepUserError:
-                            print("\nUsername already Taken! ")
-                        else:
-                            print("\nUser Information has been Updated! ")
+                            try:
+                                user_object.edit_user(new_fname, new_lname,
+                                                      new_usr, new_ph_numb,
+                                                      new_b_date)
+                            except RepUserError:
+                                print("\nUsername already Taken! ")
+                            else:
+                                print("\nUser Information has been Updated! ")
 
-                    elif stat == "3":
-                        print("\n********** ^ Password Change ^ **********\n")
-                        try:
+                        elif stat == "2":
+                            print("\n********** ^ Password\
+                                    Change ^ **********\n")
                             old_p = getpass("Old Password: ")
                             new_p = getpass("New Password: ")
                             re_new_p = getpass("New Password again: ")
-                            user_object.password_change(old_p, new_p, re_new_p)
-                        except PasswordError:
-                            print("\nWrong Original Password! ")
-                        except TwoPasswordError:
-                            print("\nTwo new passwords are not matched! ")
-                        except ShortPasswordError:
-                            print("Two Short New Password! ")
-                        else:
-                            print("\nYour Password has been changed! ")
+                            try:
+                                user_object.password_change(old_p,
+                                                            new_p, re_new_p)
+                            except PasswordError:
+                                print("\nWrong Original Password! ")
+                            except TwoPasswordError:
+                                print("\nTwo new passwords are not matched! ")
+                            except ShortPasswordError:
+                                print("Two Short New Password! ")
+                            else:
+                                print("\nYour Password has been changed! ")
+
+                        elif stat == "3":
+                            print("***** ^ Show Current Plan ^ *****")
+
+                        elif stat == "4":
+                            print("***** ^ Change Plan ^ *****")
+
+                        elif stat == "5":
+                            print("***** ^ Edit Bank Accounts ^ *****")
+                            print("Stat 1(Add a Bank Account -\
+                                    2(Edit Bank Accounts))")
+                            if stat == "1":
+                                print("***** ^ Add Bank Account ^ *****")
+
+                            elif stat == "2":
+                                print("***** ^ Edit Bank Accounts ^ *****")
+
+                    elif stat == "3":
+                        print("***** ^ Ticket Menu ^ *****")
 
                     elif stat == "4":
+                        print("***** ^ Reserve Ticket ^ *****")
+
+                    elif stat == "5":
+                        print("***** ^ Wallet Charge Menu ^ *****")
+
+                    elif stat == "6":
                         print("\nExiting User Panel...")
                         user_object.delete_user()
                         break
@@ -122,10 +165,10 @@ while 1:
                 continue
 
     elif stat == "2":
-        if path.exists("./database/admins.json"):
+        if os.path.exists("./database/admins.json"):
             Admin.dictionary = Human.json_import("./database/admins.json")
         else:
-            Human.json_create("./database/admins.json")
+            Human.json_save("./database/admins.json", {})
 
         while 1:
             print("\n******** - admin management panel - ********\n")
@@ -158,7 +201,7 @@ while 1:
                     continue
                 else:
                     print("\nSigning In Completed! ")
-                    if path.isfile("./database/films.json"):
+                    if os.path.isfile("./database/films.json"):
                         Film.films = Film.load_films_from_json()
                     else:
                         Film.save_films_to_json({})
