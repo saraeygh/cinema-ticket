@@ -1,8 +1,9 @@
 database/
+database/users.json
+database/admins.json
+database/films.json
+test_database
 log/
-/database.json
-/admins.json
-/users.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
