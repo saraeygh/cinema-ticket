@@ -34,7 +34,8 @@ class Film:
                 tickets data in the dictionary\
                 into a json file called database/films.json
         """
-        with open("./database/films.json", mode="w+", encoding="utf-8") as file:
+        with open("./database/films.json",
+                  mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @classmethod
