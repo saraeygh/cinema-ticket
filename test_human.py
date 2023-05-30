@@ -32,7 +32,7 @@ class TestHuman(unittest.TestCase):
         and creating test.json to Testing json_create/
         static method in Human Abstract class
         """
-        Human.json_create("./test_database/test.json")
+        Human.json_save("./test_database/test.json", {})
         res = os.path.isfile("./test_database/test.json")
         self.assertEqual(res, True)
 
@@ -95,19 +95,17 @@ class TestUser(unittest.TestCase):
         cls.dirpath = pathlib.Path("./test_database")
         os.mkdir(TestUser.dirpath)
         User.jsonpath = pathlib.Path("./test_database/users.json")
-        Human.json_create(User.jsonpath)
+        Human.json_save(User.jsonpath, {})
 
     def setUp(self):
         self.user1 = User(
-            "Matin", "Ghane", "bavaar", "12345", "1999/11/20", "09197951537"
+            "Matin", "Ghane", "bavaar", "12345", "1999-11-20", "09197951537"
         )
         self.user2 = User(
-            "Ali", "Alikhani", "aliii", "qwerty", "1997/10/03", "09121111111"
+            "Ali", "Alikhani", "aliii", "qwerty", "1997-10-03", "09121111111"
         )
 
     def test_get_obj(self):
-        with self.assertRaises(UserError):
-            User.get_obj("Ali", "qwerty")
         User.all_usernames.remove(self.user1.username)
         User.all_usernames.remove(self.user2.username)
         user2 = User.get_obj("bavaar", "12345")
@@ -139,9 +137,9 @@ class TestUser(unittest.TestCase):
 
     def test_edit_user(self):
         with self.assertRaises(RepUserError):
-            self.user2.edit_user("bavaar")
-        self.user1.edit_user("matin_ghane", "09365181897")
-        self.user2.edit_user("", "09122222222")
+            self.user2.edit_user("", "", "bavaar", "", "")
+        self.user1.edit_user("", "", "matin_ghane", "09365181897", "")
+        self.user2.edit_user("", "", "", "09122222222", "")
         User.dictionary = Human.json_import(User.jsonpath)
         self.assertEqual(
             User.dictionary[self.user1.username]["_username"], "matin_ghane"
@@ -189,15 +187,13 @@ class TestAdmin(unittest.TestCase):
         cls.dirpath = pathlib.Path("./test_database")
         os.mkdir(TestAdmin.dirpath)
         Admin.jsonpath = pathlib.Path("./test_database/admins.json")
-        Human.json_create(Admin.jsonpath)
+        Human.json_save(Admin.jsonpath, {})
 
     def setUp(self):
         self.admin1 = Admin("saman", "qwerty")
         self.admin2 = Admin("matin", "12345")
 
     def test_get_obj(self):
-        with self.assertRaises(UserError):
-            Admin.get_obj("Ali", "qwerty")
         Admin.all_usernames.remove(self.admin1.username)
         Admin.all_usernames.remove(self.admin2.username)
         admin2 = Admin.get_obj("matin", "12345")

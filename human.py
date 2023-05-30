@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 from abc import ABC, abstractmethod
-from datetime import datetime
+import datetime
 import uuid
 import hashlib
 import json
@@ -11,10 +11,9 @@ from custom_exceptions import (
     RepUserError,
     ShortPasswordError,
     PasswordError,
-    TwoPasswordError,
+    TwoPasswordError
 )
 
-#import BankAccount
 
 class Human(ABC):
     """
@@ -24,16 +23,10 @@ class Human(ABC):
 
     all_usernames = []
 
-    def __init__(
-        self,
-        fname: str,
-        lname: str,
-        username: str,
-        password: str,
-        birth_date: str,
-        phone_number: str = None,
-        user_id: str = None,
-    ):
+    def __init__(self, fname: str, lname: str,
+                 username: str, password: str,
+                 birth_date: str, phone_number: str = None,
+                 user_id: str = None):
         self.fname, self.lname = fname, lname
         self.username, self.password = username, password
         if user_id is None:
@@ -48,17 +41,8 @@ class Human(ABC):
         """
         This method is for hashing passwords
         """
-        hashed_pass = hashlib.sha256(password.encode("utf-8")).hexdigest()
+        hashed_pass = (hashlib.sha256(password.encode("utf-8")).hexdigest())
         return hashed_pass
-
-    @staticmethod
-    def json_create(filename):
-        """
-        This method creates a json file when there/
-        is no json file as a database to start the program.
-        """
-        with open(filename, mode="w+", encoding="utf-8") as f_1:
-            json.dump({}, f_1)
 
     @staticmethod
     def json_save(filename, dictionary):
@@ -210,34 +194,26 @@ class User(Human):
     also user can enter his/her phone number and if phone number not entered,
      it assuming to None
     """
-
     jsonpath = pathlib.Path("./database/users.json")
-    all_usernames = []
     dictionary = {}
+    all_usernames = []
 
     def __init__(
-        self,
-        fname: str,
-        lname: str,
-        username: str,
-        password: str,
-        birth_date: str,
-        phone_number: str = None,
-        user_id: str = None,
-        join_date: str = None,
-        current_plan: str = None,
-        wallet=None,
-        bank_accounts: list = None,
-    ) -> None:
+            self, fname: str, lname: str,
+            username: str, password: str,
+            birth_date: str, phone_number: str = None,
+            user_id: str = None, join_date: str = None,
+            current_plan: str = None, wallet=None,
+            bank_accounts: list = None
+            ) -> None:
         """
         The __init__ method for assigning attributes
         """
-        super().__init__(
-            fname, lname, username, password, birth_date, phone_number, user_id
-        )
+        super().__init__(fname, lname, username, password,
+                         birth_date, phone_number, user_id)
 
         if join_date is None:
-            self.join_date = str(datetime.now())
+            self.join_date = str(datetime.datetime.now())
         else:
             self.join_date = join_date
 
@@ -252,35 +228,74 @@ class User(Human):
             self.wallet = wallet
 
         if bank_accounts is None:
-            self.bank_accounts = []
+            self.bank_accounts = {}
         else:
             self.bank_accounts = bank_accounts
-
         User.all_usernames.append(self.username)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
             Human.json_save(User.jsonpath, User.dictionary)
 
-    def reserve(self, ticket, time, etc):
+
+    def apply_discount(self, price: float, discount_percent: float) -> float:
+        return price * (1 - discount_percent)
+
+    def reserve_ticket(self):
         """
         Implement ticket reserve here
         """
-        pass
+    @staticmethod
+    def show_plans():
+        """
+        Show User's Plans here
+        """
+        return {
+            "Silver plan": {"price": "100000",
+                            "discount": "20%", "Charge": "3"},
+            "Gold plan": {"price": "500000", "discount": "50%"}
+        }
 
-    def change_plan(self, old_plan, new_plan):
+    def change_plan(self, username: str, new_plan: str):
         """
         Implement User Change Plan here
         """
-        pass
 
-    def add_bank(self, account_id):
+        self.current_plan = new_plan
+
+        if new_plan == "Silver":
+            User.dictionary[username]["current_plan"] = "Silver"
+        elif new_plan == "Gold":
+            User.dictionary[username]["current_plan"] = "Gold"
+        else:
+            User.dictionary[username]["current_plan"] = "Bronze"
+
+        User.json_save(User.jsonpath, User.dictionary)
+
+    def add_bank_account(self, national_id, account_number,fname, lname, balance, password, username):
         """
         Implement Add bank account to/
         User bank accounts list here
         """
-        pass
+        new_bank_account = {
+            "national_id": national_id,
+            "fname": fname,
+            "lname": lname,
+            "balance": balance,
+            "password": password,
+            "account_number": account_number
+        }
 
-    def discount(self, days_from_join):
+        User.dictionary[username]["bank_accounts"].append(new_bank_account)
+
+        User.json_save(User.jsonpath, User.dictionary)
+
+
+    def charge_wallet(self, username, account_number):
+        for account in User.dictionary[username]["bank_accounts"]:
+            if account_number == account["account_number"]:
+                return account
+
+    def compute_discount(self, username: str, price: float, ticket_date: str):
         """
         Implement apply discount here
         """
@@ -296,23 +311,13 @@ class User(Human):
         password of the user and it will return an object/
         for us
         """
-        if username not in cls.dictionary:
-            raise UserError("Username not found! ")
         for i, j in cls.dictionary.items():
             if i == username:
-                return cls(
-                    j["fname"],
-                    j["lname"],
-                    j["_username"],
-                    password,
-                    j["birth_date"],
-                    j["phone_number"],
-                    j["user_id"],
-                    j["join_date"],
-                    j["current_plan"],
-                    j["wallet"],
-                    j["bank_accounts"],
-                )
+                our_obj = cls(j["fname"], j["lname"], j["_username"],
+                              password, j["birth_date"], j["phone_number"],
+                              j["user_id"], j["join_date"], j["current_plan"],
+                              j["wallet"], j["bank_accounts"])
+                return our_obj
 
     def __str__(self):
         """
@@ -343,24 +348,24 @@ class User(Human):
         return usr_obj
 
     @classmethod
-    def signup(
-        cls,
-        first_name: str,
-        last_name: str,
-        user_name: str,
-        password: str,
-        birth_date: str,
-        ph_numb: str = None,
-    ):
+    def signup(cls, first_name: str, last_name: str,
+               user_name: str, password: str,
+               birth_date: str, ph_numb: str = None):
         """
         This function is for Signing up users.
         first user must enter username, then enter password
         and finally enter phone number
         """
-        obj = cls(first_name, last_name, user_name, password, birth_date, ph_numb)
-        return obj
+        if user_name in User.dictionary:
+            raise RepUserError("Username Already Taken! ")
+        obj = cls(first_name, last_name,
+                  user_name, password,
+                  birth_date, ph_numb)
+        obj.delete_user()
 
-    def edit_user(self, usr_name: str = None, ph_numb: str = None):
+    def edit_user(self, fname: str,
+                  lname: str, usr_name: str,
+                  ph_numb: str, birth_date: str):
         """
         This method is used for username and/
         phone number editing
@@ -368,17 +373,26 @@ class User(Human):
         , assigning given username and phone number/
         to this instance Attributes
         """
+        if fname != "":
+            self.fname = fname
+            User.dictionary[self.username]["fname"] = fname
+        if lname != "":
+            self.lname = lname
+            User.dictionary[self.username]["lname"] = fname
+        if fname != "":
+            self.birth_date = birth_date
+            User.dictionary[self.username]["birth_date"] = fname
         if usr_name in User.dictionary:
             raise RepUserError("Username already Taken! ")
-        if usr_name != "":
-            User.all_usernames.remove(self.username)
-            del User.dictionary[self.username]
-            self.username = usr_name
-            User.all_usernames.append(self.username)
-            User.dictionary.update({self.username: self.__dict__})
         if ph_numb != "":
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
+        if usr_name != "":
+            del User.dictionary[self.username]
+            User.all_usernames.remove(self.username)
+            self.username = usr_name
+            User.all_usernames.append(self.username)
+            User.dictionary.update({self.username: self.__dict__})
         Human.json_save(User.jsonpath, User.dictionary)
 
     def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
@@ -438,7 +452,6 @@ class Admin(Human):
     This class is for modeling Admins and/
     inherites from Human Abstract user.
     """
-
     all_usernames = []
     dictionary = {}
     jsonpath = pathlib.Path("./database/admins.json")
@@ -464,17 +477,15 @@ class Admin(Human):
         password of the user and it will return an object/
         for us
         """
-        if username not in cls.dictionary:
-            raise UserError("Username not found! ")
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(j["_username"], password, j["user_id"])
 
-    @staticmethod
-    def add_show(quantity):
+    def add_show(self):
         """
         Implementing add a show here
         """
+        pass
 
     def remove_film(self):
         """
@@ -499,7 +510,8 @@ class Admin(Human):
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername: {self.username}\n\tUser ID: {self.user_id}"
+        return f"\nUser Information:\n\tUsername:\
+                {self.username}\n\tUser ID: {self.user_id}"
 
     @classmethod
     def sign_in_validation(cls, user_name: str, password: str):
@@ -530,7 +542,7 @@ class Admin(Human):
         and finally enter phone number
         """
         obj = cls(user_name, password)
-        return obj
+        obj.delete_admin()
 
     def edit_user(self, usr_name: str, ph_numb: str = None):
         """
