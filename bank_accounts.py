@@ -4,6 +4,7 @@ from human import Human
 from datetime import datetime
 import custom_exceptions
 import logging
+import platform
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -132,7 +133,9 @@ class BankAccount:
         password = Human.hashing(password)
         self._password = password
 
-    def deposit(self, national_id, password, cvv2, amount: int):
+
+    @staticmethod
+    def deposit(national_id, password, cvv2, amount: int):
         """Deposit method
 
         Args:
@@ -143,24 +146,24 @@ class BankAccount:
         """
         accounts_info = Human.json_import(BankAccount.FILENAME)
         if not national_id in accounts_info:
-            logger.debug(f"Unsuccessful deposit, {self.national_id} not found.")
+            logger.debug(f"Unsuccessful deposit, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, national ID not found.")
         if Human.hashing(password) != accounts_info[national_id]["_password"]:
             logger.debug(f"Unsuccessful deposit, Wrong password.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
         if cvv2 != accounts_info[national_id]["cvv2"]:
-            logger.debug(f"Unsuccessful deposit, {self.cvv2} for CVV2 is wrong.")
+            logger.debug(f"Unsuccessful deposit, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong CVV2.")
-        if self._balance + amount < self.MIN_BALANCE:
+        if accounts_info[national_id]["_balance"] + amount < BankAccount.MIN_BALANCE:
             logger.debug(f"Unsuccessful deposit, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
         
-        logger.debug(f"Successfully deposited {amount} to {self.national_id} bank account.")
-        self._balance += amount
-        accounts_info[national_id]["_balance"] = self._balance
+        logger.debug(f"Successfully deposited {amount} to {national_id} bank account.")
+        accounts_info[national_id]["_balance"] += amount
         Human.json_save(BankAccount.FILENAME, accounts_info)
 
-    def withdraw(self, national_id, password, cvv2, amount: int):
+    @staticmethod
+    def withdraw(national_id, password, cvv2, amount: int):
         """Withdraw method
 
         Args:
@@ -171,21 +174,20 @@ class BankAccount:
         """
         accounts_info = Human.json_import(BankAccount.FILENAME)
         if not national_id in accounts_info:
-            logger.debug(f"Unsuccessful withdraw, {self.national_id} not found.")
+            logger.debug(f"Unsuccessful withdraw, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful withdraw, national ID not found.")
         if Human.hashing(password) != accounts_info[national_id]["_password"]:
             logger.debug(f"Unsuccessful withdraw, Wrong password.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful withdraw, Wrong password.")
         if cvv2 != accounts_info[national_id]["cvv2"]:
-            logger.debug(f"Unsuccessful Withdraw, {self.cvv2} for CVV2 is wrong.")
+            logger.debug(f"Unsuccessful Withdraw, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful Withdraw, Wrong CVV2.")
         if self._balance + amount < self.MIN_BALANCE:
             logger.debug(f"Unsuccessful Withdraw, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
         
-        logger.debug(f"Successfully Withdrawed {amount} from {self.national_id} bank account.")
-        self._balance -= amount
-        accounts_info[national_id]["_balance"] = self._balance
+        logger.debug(f"Successfully Withdrawed {amount} from {national_id} bank account.")
+        accounts_info[national_id]["_balance"] -= amount
         Human.json_save(BankAccount.FILENAME, accounts_info)
 
     @staticmethod
@@ -228,7 +230,68 @@ class BankAccount:
         """
     
 def main():
-    pass
+    if platform.system() == "Linux":
+        clear_cmd = "clear"
+    else:
+        clear_cmd = "cls"
+
+    while True:
+        user_command = input(
+            """
+            1. Create new bank account.
+            2. Deposit
+            3. Withdraw
+            4. Exit
+            Insert your command: """)
+        os.system(clear_cmd)
+        match user_command:
+            case "1":
+                id = input("National ID: ")
+                first_name = input("First name: ")
+                last_name = input("Last name: ")
+                balance = int(input("Initial balance: "))
+                password = input("Transaction password: ")
+                BankAccount.create_account(id, first_name, last_name, balance, password)
+                accounts_info = Human.json_import(BankAccount.FILENAME)
+                created_account = accounts_info[id]
+                print(
+                    f"""
+                    Successfully created bank account at {created_account["creation_date"]},
+                    National ID: {created_account["national_id"]},
+                    First Name: {created_account["first_name"]},
+                    Last Name: {created_account["last_name"]},
+                    Balance: {created_account["_balance"]},
+                    Password: {password},
+                    CVV2: {created_account["cvv2"]}
+                    """)
+                input()
+                os.system(clear_cmd)
+            case "2":
+                id = input("National ID: ")
+                password = input("Transaction password: ")
+                cvv2 = int(input("CVV2: "))
+                deposit_amount = int(input("How much for deposit? "))
+                BankAccount.deposit(id, password, cvv2, deposit_amount)
+                accounts_info = Human.json_import(BankAccount.FILENAME)
+                print(
+                    f"""Succecfully dposited {deposit_amount}. Now, your balance is {accounts_info[id]["_balance"]}
+                    """)
+                input()
+                os.system(clear_cmd)
+            case "3":
+                id = input("National ID: ")
+                password = input("Transaction password: ")
+                cvv2 = int(input("CVV2: "))
+                withdraw_amount = int(input("How much for withdraw? "))
+                BankAccount.withdraw(id, password, cvv2, deposit_amount)
+                accounts_info = Human.json_import(BankAccount.FILENAME)
+                print(
+                    f"""Succecfully withdrawn {deposit_amount}. Now, your balance is {accounts_info[id]["_balance"]}
+                    """)
+                input()
+                os.system(clear_cmd)
+            case "4":
+                break
     
 if __name__ == "__main__":
     main()
