@@ -195,8 +195,8 @@ class User(Human):
      it assuming to None
     """
     jsonpath = pathlib.Path("./database/users.json")
-    all_usernames = []
     dictionary = {}
+    all_usernames = []
 
     def __init__(
             self, fname: str, lname: str,
@@ -231,7 +231,6 @@ class User(Human):
             self.bank_accounts = {}
         else:
             self.bank_accounts = bank_accounts
-
         User.all_usernames.append(self.username)
         if self.username not in User.dictionary:
             User.dictionary.update({self.username: self.__dict__})
@@ -325,8 +324,7 @@ class User(Human):
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername: {self.username}\n\t\
-                Phone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
+        return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
 
     @classmethod
     def sign_in_validation(cls, user_name: str, password: str):
@@ -363,7 +361,7 @@ class User(Human):
         obj = cls(first_name, last_name,
                   user_name, password,
                   birth_date, ph_numb)
-        return obj
+        obj.delete_user()
 
     def edit_user(self, fname: str,
                   lname: str, usr_name: str,
@@ -390,6 +388,7 @@ class User(Human):
             self.phone_number = ph_numb
             User.dictionary[self.username]["phone_number"] = ph_numb
         if usr_name != "":
+            del User.dictionary[self.username]
             User.all_usernames.remove(self.username)
             self.username = usr_name
             User.all_usernames.append(self.username)
@@ -543,7 +542,7 @@ class Admin(Human):
         and finally enter phone number
         """
         obj = cls(user_name, password)
-        return obj
+        obj.delete_admin()
 
     def edit_user(self, usr_name: str, ph_numb: str = None):
         """
