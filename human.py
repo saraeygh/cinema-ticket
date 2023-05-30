@@ -14,7 +14,7 @@ from custom_exceptions import (
     PasswordError,
     TwoPasswordError
 )
-
+from bank_accounts import create_account
 
 class Human(ABC):
     """
@@ -247,30 +247,99 @@ class User(Human):
             User.dictionary.update({self.username: self.__dict__})
             Human.json_save(User.jsonpath, User.dictionary)
 
-    def reserve(self, ticket, time, etc):
+
+    def apply_discount(self, price: float, discount_percent: float) -> float:
+        return price * (1 - discount_percent)
+
+
+    def reserve_ticket(self, ticket_date, movie_age_group, movie_release_date, username, cinema_capacity) -> bool:
         """
         Implement ticket reserve here
         """
-        pass
+        from math import floor
 
-    def change_plan(self, old_plan, new_plan):
+        user_birthday = User.dictionary[username]["birth_date"]
+        date_delta = datetime.now() - datetime(user_birthday)
+        user_age = floor(date_delta.days / 365)
+
+        if movie_age_group > user_age:
+            return False
+
+        if datetime(ticket_date) > datetime(movie_release_date):
+            return False
+        
+        if cinema_capacity < 1:
+            return False
+
+        return True
+
+
+    def show_plans(self):
+        """
+        Show User's Plans here
+        """
+        return {
+            "Silver plan": {"price": "100000", "discount": "20%"},
+            "Gold plan": {"price": "500000", "discount": "50%"}
+        }
+
+    def change_plan(self, username: str, new_plan: str):
         """
         Implement User Change Plan here
         """
-        pass
 
-    def add_bank(self, account_id):
+        self.current_plan = new_plan
+
+        if new_plan == "Silver":
+            User.dictionary[username]["current_plan"] = "Silver"
+        elif new_plan == "Gold":
+            User.dictionary[username]["current_plan"] = "Gold"
+        else:
+            User.dictionary[username]["current_plan"] = "Bronze"
+
+        User.json_save(User.jsonpath, User.dictionary)
+
+    def add_bank_account(self, national_id, account_number,fname, lname, balance, password, username):
         """
         Implement Add bank account to/
         User bank accounts list here
         """
-        pass
+        new_bank_account = {
+            "national_id": national_id,
+            "fname": fname,
+            "lname": lname,
+            "balance": balance,
+            "password": password,
+            "account_number":account_number
+        }
 
-    def discount(self, days_from_join):
+        User.dictionary[username]["bank_accounts"].append(new_bank_account)
+        
+        User.json_save(User.jsonpath, User.dictionary)
+        
+
+    def charge_wallet(self, username, account_number):
+        for account in User.dictionary[username]["bank_accounts"]:
+            if account_number == account["account_number"]:
+                return account
+
+    def compute_discount(self, username: str, price: float, ticket_date: str):
         """
         Implement apply discount here
         """
-        pass
+
+        from math import floor
+
+        user_join_date = User.dictionary[username]["join_date"]
+        date_delta = datetime(ticket_date) - datetime(user_join_date)
+        user_membership_month = floor(date_delta.days / 30)
+
+        user_birthday = User.dictionary[username]["birth_date"]
+
+        if user_birthday == ticket_date:
+            price = User.apply_discount(price, 0.5)
+
+        return User.apply_discount(price, ((user_membership_month*5)/100))
 
     @classmethod
     def get_obj(cls, username, password):
