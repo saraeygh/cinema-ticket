@@ -49,3 +49,13 @@ class FileError(Exception):
     """
     I use this Error When File Not Found.
     """
+
+class UnsuccessfulDeposit(Exception):
+    """
+    When deposit was unsuccessful.
+    """
+
+class UnsuccessfulWithdraw(Exception):
+    """
+    When Withdraw was unsuccessful.
+    """
