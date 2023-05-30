@@ -6,7 +6,6 @@ import uuid
 import hashlib
 import json
 import pathlib
-from bank_accounts import BankAccount
 from custom_exceptions import (
     UserError,
     RepUserError,
@@ -479,12 +478,10 @@ class Admin(Human):
         password of the user and it will return an object/
         for us
         """
-        if username not in cls.dictionary:
-            raise UserError("Username not found! ")
         for i, j in cls.dictionary.items():
             if i == username:
                 return cls(j["_username"], password, j["user_id"])
-    
+
     def add_show(self):
         """
         Implementing add a show here
@@ -514,7 +511,8 @@ class Admin(Human):
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername: {self.username}\n\tUser ID: {self.user_id}"
+        return f"\nUser Information:\n\tUsername:\
+                {self.username}\n\tUser ID: {self.user_id}"
 
     @classmethod
     def sign_in_validation(cls, user_name: str, password: str):
