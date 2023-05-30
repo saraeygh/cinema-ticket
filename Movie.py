@@ -129,16 +129,36 @@ while True:
     if choice == 1:
         name = input("Enter film name: ")
         genre = input("Enter film genre (Comedy / Action / Family / Romance): ")
-        age_rating = int(input("Enter film age rating: "))
-        year, month, day = input("Enter the scene_date of release of the movie: ").split("-")
+        
+        try:
+            age_rating = int(input("Enter film age rating: "))
+        except ValueError:
+            print("*Please enter your age in the number!*\n")
+            continue
+
+        try:
+            year, month, day = input("Enter the scene_date of release of the movie(YYYY-MM-DD): ").split("-")
+        except ValueError:
+            print("*sorry! Enter the release date of the movie as YYYY-MM-DD*\n")
+            continue
+
         scene_date = datetime.date(int(year), int(month), int(day)).isoformat()
-        hour , minute = input("Enter hour and minute: ").split(":")
+        
+        try:
+            hour , minute = input("Enter hour and minute(HH:MM): ").split(":")
+        except ValueError:
+            print("*Enter the exact time of the movie as HH:MM*\n")
+            continue
+
         scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
         
-        capacity = int(input("Enter the capacity of the movie theater: "))
+        try:
+            capacity = int(input("Enter the capacity of the movie theater: "))
+        except ValueError:
+            print("*Please enter your age in the number!*\n")
+            continue
 
         Film.add_film(name, genre, age_rating, scene_date, scene_time, capacity)
-       
         print("Film added successfully!")
         print()
     elif choice == 2:
