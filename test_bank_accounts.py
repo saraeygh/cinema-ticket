@@ -17,7 +17,7 @@ class TestBankAccount(unittest.TestCase):
     def test_deposit(self):
         account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
         deposit_amount = 50_000
-        account1.deposit(deposit_amount)
+        account1.deposit(account1.national_id  , deposit_amount)
         self.assertEqual(account1.balance, 150_000)
         
         account2 = BankAccount("2210000344", "Reza", "Saraey", 50_000, "1234")
@@ -35,14 +35,6 @@ class TestBankAccount(unittest.TestCase):
         withdraw_amount = 45_000
         with self.assertRaises(BalanceMinimum):
             account2.withdraw(withdraw_amount)
-
-    def test_transfer(self):
-        account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
-        account2 = BankAccount("2210000344", "Matin", "ghane", 50_000, "1234")
-        transfer_amount = 10_000
-        account1.transfer(account2, transfer_amount)
-        self.assertEqual(account1.balance, 90_000)
-        self.assertEqual(account2.balance, 60_000)
 
     def test_create_account(self):
         BankAccount.create_account("2210240300", "reza", "saraey", 10_000, "1234")

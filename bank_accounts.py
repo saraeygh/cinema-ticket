@@ -104,7 +104,7 @@ class BankAccount:
         Raises:
             custom_exceptions.BalanceMinimum: If balance goes down the min limit.
         """
-        if balance < 10_000:
+        if balance < BankAccount.MIN_BALANCE:
             logger.debug(f"Balance can not be less that Minimum {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
         logger.debug(f"Set balance = {self._balance} for national ID {self.national_id}")
@@ -182,7 +182,7 @@ class BankAccount:
         if cvv2 != accounts_info[national_id]["cvv2"]:
             logger.debug(f"Unsuccessful Withdraw, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful Withdraw, Wrong CVV2.")
-        if self._balance + amount < self.MIN_BALANCE:
+        if accounts_info[national_id]["_balance"] - amount < BankAccount.MIN_BALANCE:
             logger.debug(f"Unsuccessful Withdraw, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
         
@@ -283,10 +283,10 @@ def main():
                 password = input("Transaction password: ")
                 cvv2 = int(input("CVV2: "))
                 withdraw_amount = int(input("How much for withdraw? "))
-                BankAccount.withdraw(id, password, cvv2, deposit_amount)
+                BankAccount.withdraw(id, password, cvv2, withdraw_amount)
                 accounts_info = Human.json_import(BankAccount.FILENAME)
                 print(
-                    f"""Succecfully withdrawn {deposit_amount}. Now, your balance is {accounts_info[id]["_balance"]}
+                    f"""Succecfully withdrawn {withdraw_amount}. Now, your balance is {accounts_info[id]["_balance"]}
                     """)
                 input()
                 os.system(clear_cmd)
