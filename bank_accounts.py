@@ -1,10 +1,6 @@
-import os
-import random
+import os, platform, random, custom_exceptions, logging
 from human import Human
 from datetime import datetime
-import custom_exceptions
-import logging
-import platform
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -152,10 +148,10 @@ class BankAccount:
         if not account_name in accounts_info[national_id]:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
-        if Human.hashing(password) != accounts_info[national_id]["_password"]:
+        if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
             logger.debug(f"Unsuccessful deposit, Wrong password.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
-        if cvv2 != accounts_info[national_id]["cvv2"]:
+        if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
             logger.debug(f"Unsuccessful deposit, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong CVV2.")
         if accounts_info[national_id][account_name]["_balance"] + amount < BankAccount.MIN_BALANCE:
@@ -183,10 +179,10 @@ class BankAccount:
         if not account_name in accounts_info[national_id]:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
-        if Human.hashing(password) != accounts_info[national_id]["_password"]:
+        if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
             logger.debug(f"Unsuccessful withdraw, Wrong password.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful withdraw, Wrong password.")
-        if cvv2 != accounts_info[national_id]["cvv2"]:
+        if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
             logger.debug(f"Unsuccessful Withdraw, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful Withdraw, Wrong CVV2.")
         if accounts_info[national_id][account_name]["_balance"] - amount < BankAccount.MIN_BALANCE:
