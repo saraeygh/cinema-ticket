@@ -1,6 +1,6 @@
 import os
 import random
-from human import Human, User
+from human import Human
 from datetime import datetime
 import custom_exceptions
 
@@ -168,11 +168,11 @@ class BankAccount:
             password (str): User inputed password.
         """
         new_account = BankAccount(national_id, first_name, last_name, balance, password)
-        BankAccount.accounts_dict.update(
-            {new_account.national_id: new_account.__dict__}
-        )
-        os.makedirs(os.path.dirname("./database/bank_accounts.json"), exist_ok=True)
-        Human.json_save("./database/bank_accounts.json", BankAccount.accounts_dict)
+        if not os.path.exists("./database/bank_accounts.json"):
+            Human.json_create("./database/bank_accounts.json")
+        data = Human.json_import("./database/bank_accounts.json")
+        data.update({new_account.national_id: new_account.__dict__})
+        Human.json_save("./database/bank_accounts.json", data)
 
     def __str__(self) -> str:
         """Cutomize print output of object."""
