@@ -17,6 +17,8 @@ from custom_exceptions import (
     PasswordError,
     TwoPasswordError,
     PhoneNumberError,
+    FilmError.
+    TicketError
 )
 
 
@@ -277,10 +279,18 @@ class User(Human):
     def apply_discount(self, price: float, discount_percent: float) -> float:
         return price * (1 - discount_percent)
 
-    def reserve_ticket(self):
+    def reserve_ticket(self, film_name, scene_date, showtime, quantity, national_id, account_name, password, cvv2):
         """
         Implement ticket reserve here
         """
+        if film_name not in Film.films:
+            raise FilmError("Film Not found! ")
+        ticket_key = scene_date + " _ " + showtime
+        if ticket_key not in Film.films[film_name]["tickets"]:
+            raise TicketError("ticket Not Found! ")
+        total_price = Film.films["tickets"]["price"] * quantity
+        BankAccount.withdraw(national_id, account_name, password, cvv2, total_price)
+        Ticket.sell_ticket(film_name, ticket_key, quantity)
 
     @staticmethod
     def show_plans():
@@ -543,11 +553,11 @@ class Admin(Human):
                 return cls(j["_username"], password, j["user_id"])
 
     @staticmethod
-    def add_show(name, scene_date, showtime, capacity):
+    def add_show(name, scene_date, showtime, capacity, price):
         """
         Implementing add a show here
         """
-        Ticket.add_ticket(name, scene_date, showtime, capacity)
+        Ticket.add_ticket(name, scene_date, showtime, capacity, price)
 
     @staticmethod
     def remove_film(name):
