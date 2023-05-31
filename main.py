@@ -14,7 +14,8 @@ from custom_exceptions import (
     ShortPasswordError,
     FilmError,
     PhoneNumberError,
-    AddTicketFailed
+    AddTicketFailed,
+    AlreadyExistAccount
 )
 from human import Human, User, Admin
 
@@ -55,19 +56,16 @@ while 1:
     stat = input("Stat:\n1 - User mode\n2 - Admin mode\n0 - Exit\nEnter command number: ")
     os.system(clear_cmd)
 
-
     if stat == "1":
         if os.path.exists("./database/users.json"):
             User.dictionary = Human.json_import("./database/users.json")
         else:
             Human.json_save("./database/users.json", {})
 
-
         while 1:
             print("\n******** - Welcome to user management panel - ********\n")
             stat = input("Stat:\n1 - Sign Up\n2 - Sign In\n0 - Exit\nEnter command number: ")
             os.system(clear_cmd)
-
 
             # User sign up - Checked: OK.
             if stat == "1":
@@ -95,12 +93,12 @@ while 1:
                 else:
                     os.system(clear_cmd)
                     print("\nSigning Up Completed! ")
-        
 
             elif stat == "2":
                 print("\n************** - Login form - **************\n")
                 username = input("Enter Username: ")
                 password = getpass("Enter Password: ")
+                os.system(clear_cmd)
                 try:
                     user_object = User.sign_in_validation(username, password)
                 except UserError:
@@ -120,17 +118,20 @@ while 1:
                     stat = input(
                         "State:\n1 - Show User Information\n2 - Edit user info\n3 - Show available Tickets\n4 - Reserve Ticket\n5 - Charge Wallet\n0 - Back to Main Menu: "
                     )
+                    os.system(clear_cmd)
                     if stat == "1":
                         print(user_object)
                         print("List of Bank Accounts:")
+                        print(User.dictionary[user_object.username]["bank_accounts"])
+                        os.system(clear_cmd)
 
                     elif stat == "2":
                         while 1:
                             print("\n***** ^ Edit User mode ^ *****\n")
                             stat = input(
-                                "Stat 1(Edit profile) - 2(Password Change) - 3(Show Current Plan) - 4(Change Plan) - 5(Edit Bank Accounts) - 6(Back to Dashboard)   "
+                                    "State:\n1 - Edit profile\n2 - Password Change\n3 - Show Current Plan\n4 - Change Plan\n5 - Bank Accounts\n6 - Back to Dashboard"
                             )
-
+                            os.system(clear_cmd)
                             if stat == "1":
                                 print("\n***** ^ Edit Profile mode ^ *****\n")
                                 print(
@@ -143,6 +144,7 @@ while 1:
                                 )
                                 new_usr = input("Enter New Username: ")
                                 new_ph_numb = input("New Phone Number: ")
+                                os.system(clear_cmd)
                                 try:
                                     user_object.edit_user(
                                         new_fname,
@@ -161,6 +163,7 @@ while 1:
                                 old_p = getpass("Old Password: ")
                                 new_p = getpass("New Password: ")
                                 re_new_p = getpass("New Password again: ")
+                                os.system(clear_cmd)
                                 try:
                                     user_object.password_change(old_p, new_p, re_new_p)
                                 except PasswordError:
@@ -174,22 +177,65 @@ while 1:
 
                             elif stat == "3":
                                 print("***** ^ Show Current Plan ^ *****")
+                                os.system(clear_cmd)
 
                             elif stat == "4":
                                 print("***** ^ Change Plan ^ *****")
+                                os.system(clear_cmd)
 
                             elif stat == "5":
-                                print("***** ^ Edit Bank Accounts ^ *****")
-                                print(
-                                    "Stat 1(Add a Bank Account -\
-                                        2(Edit Bank Accounts))"
-                                )
-                                if stat == "1":
-                                    print("***** ^ Add Bank Account ^ *****")
+                                while 1:
+                                    print("***** ^ Bank Accounts ^ *****")
+                                    print(
+                                            "State:\n1 - Add a Bank Account\n2 - Edit Bank Accounts\n3 - Exit Bank Accounts panel\n"
+                                    )
+                                    stat = input("Enter Command: ")
+                                    os.system(clear_cmd)
+                                    if stat == "1":
+                                        print("***** ^ Add Bank Account ^ *****")
+                                        national_id = input("Enter National ID: ")
+                                        account_name = input("Enter Account Name: ")
+                                        balance = int(input("Enter Account Balance: "))
+                                        account_password = getpass("Enter Bank Account Password: ")
+                                        os.system(clear_cmd)
+                                        try:
+                                            user_object.add_bank_account(national_id,
+                                                                         account_name,
+                                                                         user_object.fname,
+                                                                         user_object.lname,
+                                                                         balance,
+                                                                         account_password)
+                                        except AlreadyExistAccount:
+                                            print("Account Name Already Exists! ")
+                                        User.json_save(User.jsonpath, User.dictionary)
 
-                                elif stat == "2":
-                                    print("***** ^ Edit Bank Accounts ^ *****")
+                                    elif stat == "2":
+                                        while 1:
+                                            print("***** ^ Edit Bank Accounts ^ *****")
+                                            stat = input("Stat 1(Deposit) - 2(Edit Account Password)")
 
+                                            if stat == "1":
+                                                print("\n***** ^ Deposit Form ^ *****\n")
+                                                national_id = input("Enter National Id: ")
+                                                account_name = input("Enter Account Name: ")
+                                                depos = input("Enter Amount of deposition: ")
+                                                account_password = getpass("Enter Account Password: ")
+                                                cvv2 = getpass("Enter Account CVV2")
+                                                user_object.charge_bank_account(user_object.username,
+                                                                                national_id, account_name,
+                                                                                account_password, cvv2, depos)
+    
+                                            elif stat == "2":
+                                                print("***** ^ Edit Account Password Form ^ *****")
+    
+                                            elif stat == "3":
+                                                print("Exiting Edit Bank Accounts panel...")
+                                                break
+
+                                    elif stat == "3":
+                                        print("Exit Bank Accounts Panel...")
+                                        break
+    
                     elif stat == "3":
                         print("***** ^ Ticket Menu ^ *****")
 
