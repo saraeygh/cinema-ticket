@@ -1,5 +1,5 @@
 #! /usr/bin/python3
-
+import platform, os
 from os import path
 from getpass import getpass
 from custom_exceptions import (
@@ -9,21 +9,27 @@ from custom_exceptions import (
         TwoPasswordError,
         ShortPasswordError
         )
-
 from human import Human, User, Admin
+
+if platform.system() == "Linux":
+    clear_cmd = "clear"
+else:
+    clear_cmd = "cls"
 
 while 1:
     print("\n***** - Welcome to cinema Ticket - *****")
     stat = input("Stat (1(User mode) - 2(Admin mode)) - 0(Exit)   ")
+    os.system(clear_cmd)
     if stat == "1":
-        if path.exists("./users.json"):
-            User.dictionary = Human.json_import("users.json")
+        if path.exists("./database/users.json"):
+            User.dictionary = Human.json_import("./database/users.json")
         else:
-            Human.json_create("users.json")
+            Human.json_create("./database/users.json")
 
         while 1:
             print("\n******** - Welcome to user management panel - ********\n")
             stat = input("Stat (0(Exit) - 1(Sign Up) - 2(Sign In)):   ")
+            os.system(clear_cmd)
             if stat == "5":
                 print("***** ^ Secret Admin panel ^ *****")
                 print(User.dictionary.keys(), end="\n\n")
