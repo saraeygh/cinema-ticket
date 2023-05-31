@@ -35,7 +35,7 @@ class BankAccount:
     """
     FILENAME = "./database/bank_accounts.json"
     MIN_BALANCE = 10_000
-
+    accounts_info = {}
     def __init__(
         self,
         national_id: str,
@@ -44,6 +44,9 @@ class BankAccount:
         last_name: str,
         balance: float,
         password: str,
+        creation_date: str = None,
+        cvv2: int = None,
+        accounts: dict = {}
     ):
         """Initialize instance
 
@@ -69,9 +72,18 @@ class BankAccount:
         self.first_name = first_name
         self.last_name = last_name
         self._balance = balance
-        self._password = BankAccount.hashing(password)
-        self.creation_date = datetime.now().isoformat(timespec="seconds")
-        self.cvv2 = random.randint(1111, 9999)
+        self.accounts = accounts
+        self.password = password
+        if creation_date is not None:
+            self.creation_date = creation_date
+        else:
+            self.creation_date = datetime.now().isoformat(timespec="seconds")
+        if cvv2 is not None:
+            self.cvv2 = cvv2
+        else:
+            self.cvv2 = random.randint(1111, 9999)
+        self.accounts.update({self.account_name: self.__dict__})
+        BankAccount.accounts_info.update({self.national_id: self.accounts})
 
     @staticmethod
     def hashing(password: str):
@@ -186,7 +198,7 @@ class BankAccount:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
 
-        if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
+        if BankAccount.hashing(password) != accounts_info[national_id][account_name]["_BankAccount__password"]:
             logger.debug(f"Unsuccessful deposit, Wrong password.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
 
@@ -197,10 +209,10 @@ class BankAccount:
         if accounts_info[national_id][account_name]["_balance"] + amount < BankAccount.MIN_BALANCE:
             logger.debug(f"Unsuccessful deposit, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
-        
+
         logger.debug(f"Successfully deposited {amount} to {national_id}-{account_name} bank account.")
         accounts_info[national_id][account_name]["_balance"] += amount
-        Human.json_save(BankAccount.FILENAME, accounts_info)
+        BankAccount.json_save(BankAccount.FILENAME, accounts_info)
 
     @staticmethod
     def withdraw(national_id, account_name, password, cvv2, amount: int):
@@ -212,14 +224,14 @@ class BankAccount:
         Raises:
             custom_exceptions.BalanceMinimum: If balance goes down the min limit.
         """
-        accounts_info = Human.json_import(BankAccount.FILENAME)
-        if not national_id in accounts_info:
+        accounts_info = BankAccount.json_import(BankAccount.FILENAME)
+        if national_id not in accounts_info:
             logger.debug(f"Unsuccessful withdraw, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful withdraw, national ID not found.")
-        if not account_name in accounts_info[national_id]:
+        if account_name not in accounts_info[national_id]:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
-        if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
+        if BankAccount.hashing(password) != accounts_info[national_id][account_name]["_BankAccount__password"]:
             logger.debug(f"Unsuccessful withdraw, Wrong password.")
             raise custom_exceptions.UnsuccessfulWithdraw("Unsuccessful withdraw, Wrong password.")
         if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
@@ -228,10 +240,10 @@ class BankAccount:
         if accounts_info[national_id][account_name]["_balance"] - amount < BankAccount.MIN_BALANCE:
             logger.debug(f"Unsuccessful Withdraw, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
-        
+
         logger.debug(f"Successfully Withdrawed {amount} from {national_id}-{account_name} bank account.")
         accounts_info[national_id][account_name]["_balance"] -= amount
-        Human.json_save(BankAccount.FILENAME, accounts_info)
+        BankAccount.json_save(BankAccount.FILENAME, accounts_info)
 
     @classmethod
     def create_account(
@@ -252,19 +264,19 @@ class BankAccount:
             balance (float): User inputed balance.
             password (str): User inputed password.
         """
-        new_account = cls(national_id, account_name, first_name, last_name, balance, password)
-
         if not os.path.exists(BankAccount.FILENAME):
             cls.json_save(BankAccount.FILENAME, {})
             logger.debug("Created bank accounts JSON database.")
-        data = cls.json_import(BankAccount.FILENAME)
-        logger.debug("Read accounts info from JSON database.")
+        else:
+            BankAccount.accounts_info = cls.json_import(BankAccount.FILENAME)
+            logger.debug("Read accounts info from JSON database.")
 
-        if national_id in data:
-            accounts = data[new_account.national_id]
-            accounts.update({new_account.account_name: new_account.__dict__})
-            data.update({new_account.national_id: accounts})
+        new_account = cls(national_id, account_name, first_name, last_name, balance, password)
 
+        if national_id in BankAccount.accounts_info:
+            new_account.accounts = BankAccount.accounts_info[new_account.national_id]
+            new_account.accounts.update({new_account.account_name: new_account.__dict__})
+            BankAccount.accounts_info.update({new_account.national_id: new_account.accounts})
         else:
             data.update({new_account.national_id: {new_account.account_name: new_account.__dict__}})
             logger.debug("Added new bank account to JSON database.")
@@ -306,8 +318,8 @@ def main():
                 balance = int(input("Initial balance: "))
                 password = input("Transaction password: ")
                 BankAccount.create_account(id, account_name, first_name, last_name, balance, password)
-                
-                accounts_info = Human.json_import(BankAccount.FILENAME)
+
+                accounts_info = BankAccount.json_import(BankAccount.FILENAME)
                 created_account = accounts_info[id]
                 print(
                     f"""
@@ -329,7 +341,7 @@ def main():
                 cvv2 = int(input("CVV2: "))
                 deposit_amount = int(input("How much for deposit? "))
                 BankAccount.deposit(id, account_name, password, cvv2, deposit_amount)
-                accounts_info = Human.json_import(BankAccount.FILENAME)
+                accounts_info = BankAccount.json_import(BankAccount.FILENAME)
                 created_account = accounts_info[id]
                 print(
                     f"""Succecfully dposited {deposit_amount}. Now, your balance is {created_account[account_name]["_balance"]}
@@ -343,7 +355,7 @@ def main():
                 cvv2 = int(input("CVV2: "))
                 withdraw_amount = int(input("How much for deposit? "))
                 BankAccount.withdraw(id, account_name, password, cvv2, withdraw_amount)
-                accounts_info = Human.json_import(BankAccount.FILENAME)
+                accounts_info = BankAccount.json_import(BankAccount.FILENAME)
                 created_account = accounts_info[id]
                 print(
                     f"""Succecfully withdrawed {withdraw_amount}. Now, your balance is {created_account[account_name]["_balance"]}
