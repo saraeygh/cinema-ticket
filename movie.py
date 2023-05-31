@@ -38,6 +38,7 @@ class Film:
         self.genre = genre
         self.age_rating = age_rating
         self.tickets = tickets
+
         Film.films.update({self.name: self.__dict__})
         Film.save_films_to_json("./database/films.json", Film.films)
 
@@ -61,14 +62,14 @@ class Film:
         with open(JSON_FILE, mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
-    @classmethod
-    def add_film(cls, name: str, genre: str, age_rating: str):
+    @staticmethod
+    def add_film(name: str, genre: str, age_rating: str):
         """
         This class method is for adding a film and its ticket.
         """
-        obj = cls(name, genre, age_rating)
-        obj.delete_film_obj()
-
+        Film.films = Film.load_films_from_json("./database/films.json")
+        Film(name, genre, age_rating)
+        
     @classmethod
     def get_object(cls, name):
         """
@@ -78,7 +79,7 @@ class Film:
         """
         for i, j in Film.films.items():
             if i == name:
-                return cls(j["name"], j["genre"], j["age_rating"], j["tickets"])
+                return cls(j["name"], j["genre"], j["age_rating"])
 
     def delete_film_obj(self):
         del self
@@ -108,18 +109,17 @@ class Ticket(Film):
         self.showtime = showtime
         self.available_seats = capacity
         self.price = price
+
         Ticket.ticket_dict.update(
             {f"{self.scene_date} _ {self.showtime}": self.__dict__}
         )
         Film.films = Film.load_films_from_json("./database/films.json")
+        
         Ticket.ticket_dict.update(Film.films[name]["tickets"])
         Film.films[name]["tickets"] = Ticket.ticket_dict
 
-        for film, info in Film.films.items():
-            if film == self.name:
-                info["tickets"].update(Ticket.ticket_dict)
-
         Film.save_films_to_json("./database/films.json", Film.films)
+        Ticket.ticket_dict.clear()
 
     @staticmethod
     def add_ticket(name, scene_date, showtime, capacity, price):
@@ -137,8 +137,8 @@ class Ticket(Film):
                 count from our total quantity of that\
                 ticket
         """
-        if quantity <= Film.films[film_name]["tickets"][ticket_key]["capacity"]:
-            Film.films[film_name]["tickets"][ticket_key]["capacity"] -= quantity
+        if quantity <= Film.films[film_name]["tickets"][ticket_key]["available_seats"]:
+            Film.films[film_name]["tickets"][ticket_key]["available_seats"] -= quantity
             Film.save_films_to_json("./database/films.json", Film.films)
             print(f"{quantity} ticket(s) sold successfully.")
         else:

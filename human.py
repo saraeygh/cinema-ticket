@@ -278,8 +278,9 @@ class User(Human):
 
     def apply_discount(self, price: float, discount_percent: float) -> float:
         return price * (1 - discount_percent)
-
-    def reserve_ticket(self, film_name, scene_date, showtime, quantity, national_id, account_name, password, cvv2):
+    
+    @staticmethod
+    def reserve_ticket(film_name, scene_date, showtime, quantity, national_id, account_name, password, cvv2):
         """
         Implement ticket reserve here
         """
@@ -288,7 +289,7 @@ class User(Human):
         ticket_key = scene_date + " _ " + showtime
         if ticket_key not in Film.films[film_name]["tickets"]:
             raise TicketError("ticket Not Found! ")
-        total_price = Film.films["tickets"]["price"] * quantity
+        total_price = Film.films[film_name]["tickets"][scene_date+" _ "+showtime]["price"] * quantity
         BankAccount.withdraw(national_id, account_name, password, cvv2, total_price)
         Ticket.sell_ticket(film_name, ticket_key, quantity)
 
@@ -337,6 +338,9 @@ class User(Human):
     def charge_wallet(self, national_id, account_name, password, cvv2, amount):
         BankAccount.withdraw(national_id, account_name, password, cvv2, amount)
         self.wallet += amount
+        print(self.wallet)
+        User.dictionary = User.json_import(User.jsonpath)
+        User.dictionary[self._username]["wallet"] = self.wallet
         User.json_save(User.jsonpath, User.dictionary)
 
     def compute_discount(self, username: str, price: float, ticket_date: str):

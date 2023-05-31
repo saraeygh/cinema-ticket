@@ -257,7 +257,7 @@ while 1:
                                         while 1:
                                             print("***** ^ Edit Bank Accounts ^ *****")
                                             print(
-                                                "State:\n - Deposit\n2 - Exit Edit Bank Account Panel"
+                                                "State:\n1 - Deposit\n2 - Exit Edit Bank Account Panel"
                                             )
                                             stat = input("Enter Command: ")
                                             os.system(CLEAR_CMD)
@@ -281,7 +281,7 @@ while 1:
                                                     "Enter Account Password: "
                                                 )
                                                 cvv2 = int(
-                                                    getpass("Enter Account CVV2")
+                                                    getpass("Enter Account CVV2:  ")
                                                 )
                                                 user_object.charge_bank_account(
                                                     user_object.username,
@@ -292,7 +292,7 @@ while 1:
                                                     depos,
                                                 )
 
-                                            elif stat == "3":
+                                            elif stat == "2":
                                                 print(
                                                     "Exiting Edit Bank Accounts panel..."
                                                 )
@@ -304,10 +304,10 @@ while 1:
 
                     elif stat == "3":
                         print("***** ^ Ticket Menu ^ *****")
-                        for i, j in Film.films.items():
-                            print(i)
-                            for m, k in j["tickets"].items():
-                                print(f"\n\t{m}: {k}")
+                        film_list = Film.films.keys()
+                        for film in film_list:
+                            scene_list = list(Film.films[film]["tickets"].keys())
+                            print(f"Available scenes for {film}: {scene_list}")
 
                     elif stat == "4":
                         os.system(CLEAR_CMD)
@@ -423,10 +423,6 @@ while 1:
                 else:
                     os.system(CLEAR_CMD)
                     print("\nSigning In Completed! ")
-                    if os.path.isfile("./database/films.json"):
-                        Film.films = Film.load_films_from_json("./database/films.json")
-                    else:
-                        Film.save_films_to_json("./database/films.json", {})
 
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
