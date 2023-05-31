@@ -16,6 +16,14 @@ from custom_exceptions import (
     PhoneNumberError,
     AddTicketFailed,
     AlreadyExistAccount,
+    FilmError,
+    AddTicketFailed,
+    TicketError,
+    UnsuccesfulIdDeposit,
+    UnsuccesfulAccountDeposit,
+    UnsuccesfulPasswordDeposit,
+    UnsuccesfulCvv2Deposit,
+    BalanceMinimum
 )
 from human import Human, User, Admin
 
@@ -32,6 +40,14 @@ if os.path.exists("./database/admins.json"):
     Admin.dictionary = Human.json_import("./database/admins.json")
 else:
     Human.json_save("./database/admins.json", {})
+
+if not os.path.isdir("./database"):
+    os.mkdir("./database")
+if os.path.exists("./database/films.json"):
+    Film.films = Film.load_films_from_json("./database/films.json")
+else:
+    Film.save_films_to_json("./database/films.json", {})
+
 
 # Admin signup through a scripting command - Checked: OK
 parser = argparse.ArgumentParser(
@@ -80,7 +96,7 @@ while 1:
                 lname = input("Enter Last Name: ")
                 username = input("Enter Username: ")
                 password = getpass("Enter Password: ")
-                birth_date = input("Enter Birth date (YYYY/MM/DD): ")
+                birth_date = input("Enter Birth date (YYYY-MM-DD): ")
                 phone_number = input("Enter Phone number (e.g. 09876543210) : ")
                 os.system(CLEAR_CMD)
                 try:
@@ -129,7 +145,9 @@ while 1:
                     if stat == "1":
                         print(user_object)
                         print("List of Bank Accounts: ")
-                        for i, j in User.dictionary[user_object.username]["bank_accounts"].items():
+                        for i, j in User.dictionary[user_object.username][
+                            "bank_accounts"
+                        ].items():
                             print(i)
                             for m, k in j.items():
                                 print(f"\n\t{m}: {k}")
@@ -226,9 +244,13 @@ while 1:
                                         except AlreadyExistAccount:
                                             print("Account Name Already Exists! ")
                                         else:
-                                            User.json_save(User.jsonpath, User.dictionary)
+                                            User.json_save(
+                                                User.jsonpath, User.dictionary
+                                            )
                                             print("Bank Account Add Successfully! \n")
-                                            for i, j in User.dictionary[user_object.username]["bank_accounts"][account_name].items():
+                                            for i, j in User.dictionary[
+                                                user_object.username
+                                            ]["bank_accounts"][account_name].items():
                                                 print(f"{i}: {j}")
 
                                     elif stat == "2":
@@ -282,11 +304,54 @@ while 1:
 
                     elif stat == "3":
                         print("***** ^ Ticket Menu ^ *****")
+                        for i, j in Film.films.items():
+                            print(i)
+                            for m, k in j["tickets"].items():
+                                print(f"\n\t{m}: {k}")
 
                     elif stat == "4":
+                        os.system(CLEAR_CMD)
                         print("***** ^ Reserve Ticket ^ *****")
+                        film_name = input("Enter Film Name: ")
+                        year, month, day = input("Enter scene date (YYYY-MM-DD): ").split("-")
+                        scene_date = datetime.date(int(year), int(month), int(day)).isoformat()
+                        hour, minute = input("Enter Scene time (HH:MM): ").split(":")
+                        scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec="minutes")
+                        quantity = int(input("Enter Quantity: "))
+                        print("\n***** ^ Checkout Form ^ *****\n")
+                        national_id = input("Enter National ID: ")
+                        account_name = input("enter Account Name: ")
+                        password = getpass("Enter password: ")
+                        cvv2 = int(input("Enter CVV2: "))
+                        try:
+                            User.reserve_ticket(film_name, scene_date, scene_time, quantity, national_id, account_name, password, cvv2)
+                        except FilmError:
+                            os.system(CLEAR_CMD)
+                            print("Film Not Found! ")
+                        except TicketError:
+                            os.system(CLEAR_CMD)
+                            print("ticket Not Found! ")
+                        except UnsuccesfulIdDeposit:
+                            os.system(CLEAR_CMD)
+                            print("National Id Not Found! ")
+                        except UnsuccesfulAccountDeposit:
+                            os.system(CLEAR_CMD)
+                            print("Account Not Found! ")
+                        except UnsuccesfulPasswordDeposit:
+                            os.system(CLEAR_CMD)
+                            print("Wrong Password! ")
+                        except UnsuccesfulCvv2Deposit:
+                            os.system(CLEAR_CMD)
+                            print("Wrong CVV2")
+                        except BalanceMinimum:
+                            os.system(CLEAR_CMD)
+                            print("Minimum Balance Reached! ")
+                        else:
+                            os.system(CLEAR_CMD)
+                            print("Ticket(s) Reserved Successfully! ")
 
                     elif stat == "5":
+                        os.system(CLEAR_CMD)
                         print("***** ^ Wallet Charge Menu ^ *****")
 
                     elif stat == "0":
@@ -334,9 +399,9 @@ while 1:
                     os.system(CLEAR_CMD)
                     print("\nSigning In Completed! ")
                     if os.path.isfile("./database/films.json"):
-                        Film.films = Film.load_films_from_json()
+                        Film.films = Film.load_films_from_json("./database/films.json")
                     else:
-                        Film.save_films_to_json({})
+                        Film.save_films_to_json("./database/films.json", {})
 
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
@@ -385,9 +450,14 @@ while 1:
                             hour=int(hour), minute=int(minute)
                         ).isoformat(timespec="minutes")
                         ticket_capacity = int(input("Enter the Scene Capacity: "))
+                        ticket_price = int(input("Enter the Ticket Price: "))
                         try:
                             Admin.add_show(
-                                film_name, film_date, scene_time, ticket_capacity
+                                film_name,
+                                film_date,
+                                scene_time,
+                                ticket_capacity,
+                                ticket_price,
                             )
                         except AddTicketFailed:
                             os.system(CLEAR_CMD)
