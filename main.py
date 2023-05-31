@@ -13,9 +13,13 @@ from custom_exceptions import (
     TwoPasswordError,
     ShortPasswordError,
     FilmError,
+    PhoneNumberError
 )
 
 from human import Human, User, Admin
+
+if not os.path.isdir("./database"):
+    os.mkdir("./database")
 
 if os.path.exists("./database/admins.json"):
     Admin.dictionary = Human.json_import("./database/admins.json")
@@ -26,17 +30,16 @@ parser = argparse.ArgumentParser(description="Take Username and Password from CL
 parser.add_argument("-u", "--username", type=str, help="Username of New Admin")
 parser.add_argument("-p", "--password", type=str, help="Password of New Admin")
 args = parser.parse_args()
-try:
-    Admin.signup(args.username, args.password)
-except RepUserError:
-    print("Username Already Taken! \n")
-    sys.exit("Exiting the Admin Creating Interface...")
-else:
-    print("Admin Created! \n")
-    sys.exit("Exiting the Admin Creating Interface...")
 
-if not os.path.isdir("./database"):
-    os.mkdir("./database")
+if (args.username is not None) and (args.password is not None):
+    try:
+        Admin.signup(args.username, args.password)
+    except RepUserError:
+        print("Username Already Taken! \n")
+        sys.exit("Exiting the Admin Creating Interface...")
+    else:
+        print("Admin Created! \n")
+        sys.exit("Exiting the Admin Creating Interface...")
 
 while 1:
     print("\n***** - Welcome to cinema Ticket - *****")
@@ -237,14 +240,14 @@ while 1:
 
                     elif stat == "3":
                         print("***** ^ Add Ticket ^ *****")
-                        film_name = input("Enter Film Name")
+                        film_name = input("Enter Film Name: ")
                         year, month, day = input(
                             "Enter scene date (YYYY-MM-DD): "
                         ).split("-")
                         film_date = datetime.date(
                             int(year), int(month), int(day)
                         ).isoformat()
-                        hour, minute = input("Enter Scene time (HH:MM): ")
+                        hour, minute = input("Enter Scene time (HH:MM): ").split(":")
                         scene_time = datetime.time(
                             hour=int(hour), minute=int(minute)
                         ).isoformat(timespec="minutes")
@@ -255,6 +258,8 @@ while 1:
                             )
                         except Exception:
                             print("Invalid truncation, please Try again.")
+                        else:
+                            print("\nTicket Added Successfully! \n")
 
                     elif stat == "4":
                         print(admin_object)
@@ -263,10 +268,13 @@ while 1:
                         print("********** ^ admin Edit Username ^ **********")
                         print("abort change any item, leave it and Enter.\n")
                         new_username = input("Enter New Username: ")
+                        new_ph_numb = input("Enter New Phone Number: ")
                         try:
-                            admin_object.edit_user(new_username)
+                            admin_object.edit_user(new_username, new_ph_numb)
                         except RepUserError:
                             print("\nUsername already Taken! ")
+                        except PhoneNumberError:
+                            print("Invalid Phone Number format! ")
                         else:
                             print("\nUser Information has been Updated! ")
 
