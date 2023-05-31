@@ -572,6 +572,8 @@ class Admin(Human):
         first user must enter username, then enter password
         and finally enter phone number
         """
+        if user_name in Admin.dictionary:
+            raise RepUserError("Username Already Taken! ")
         obj = cls(user_name, password)
         obj.delete_admin()
 
@@ -591,6 +593,8 @@ class Admin(Human):
             self.username = usr_name
             Admin.all_usernames.append(self.username)
             Admin.dictionary.update({self.username: self.__dict__})
+        if ph_numb != "":
+            Admin.dictionary[self.username]["_phone_number"] = ph_numb
         Human.json_save(Admin.jsonpath, Admin.dictionary)
 
     def password_change(self, old_pass: str, new_pass: str, rep_new_pass: str):
@@ -635,6 +639,19 @@ class Admin(Human):
             raise ShortPasswordError("Too short Password! ")
         key_value = Human.hashing(passwd_value)
         self.__password = key_value
+
+    @property
+    def phone_number(self):
+        """
+        Getter for Phone Number
+        """
+        return self._phone_number
+
+    @phone_number.setter
+    def phone_number(self, ph_value):
+        if not User.phone_number_check(ph_value):
+            raise PhoneNumberError("Invalid Phone Number Format! ")
+        self._phone_number = ph_value
 
     @staticmethod
     def uuid_gen():
