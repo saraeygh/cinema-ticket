@@ -1,5 +1,6 @@
-#! /usr/bin/python3
-
+"""
+This module contains Human, User and Admin classes
+"""
 from abc import ABC, abstractmethod
 import datetime
 import uuid
