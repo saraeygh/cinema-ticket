@@ -6,7 +6,7 @@ from abc import ABC
 from human import User
 import custom_exceptions
 from bank_accounts import BankAccount
-from datetime import datetime
+from datetime import datetime, timedelta
 
 USERS_JSON = "./database/users.json"
 
@@ -19,13 +19,11 @@ class Silver(ABC):
         pass
 
     def active(self, username, national_id, account_name, password, cvv2):
-        if BankAccount.withdraw(national_id, account_name, password, cvv2, Silver.PRICE):
-            credit = 3
-            users_data = BankAccount.json_import(USERS_JSON)
-            users_data[username].update({"credit": credit})
-            User.change_plan(self, username, "Silver")
-        else:
-            raise custom_exceptions.BuySilverFailed("Payment failed, Couldnt activate silver plan.")
+        BankAccount.withdraw(national_id, account_name, password, cvv2, Silver.PRICE)
+        credit = 3
+        users_data = BankAccount.json_import(USERS_JSON)
+        users_data[username].update({"credit": credit})
+        User.change_plan(self, username, "Silver")
 
     def deactive(self, username):
         User.change_plan(self, username, "Bronze")
@@ -39,10 +37,10 @@ class Silver(ABC):
             return False
         else:
             discount_cost = (cost * (1 - Silver.DISCOUNT))
-            if BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost):
-                users_data[username]["credit"] -= 1
-                users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
-                BankAccount.json_save(USERS_JSON, users_data)
+            BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost)
+            users_data[username]["credit"] -= 1
+            users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
+            BankAccount.json_save(USERS_JSON, users_data)
             
 class Gold(ABC):
 
@@ -53,13 +51,12 @@ class Gold(ABC):
         pass
  
     def active(self, username, national_id, account_name, password, cvv2):
-        if BankAccount.withdraw(national_id, account_name, password, cvv2, Gold.PRICE):
-            buy_date_time = datetime.now()
-            users_data = BankAccount.json_import(USERS_JSON)
-            users_data[username].update({"credit": credit})
-            User.change_plan(self, username, "Silver")
-        else:
-            raise custom_exceptions.BuySilverFailed("Payment failed, Couldnt activate silver plan.")
+        BankAccount.withdraw(national_id, account_name, password, cvv2, Gold.PRICE)
+        buy_date_time = datetime.now()
+        users_data = BankAccount.json_import(USERS_JSON)
+        users_data[username].update({"start_date": buy_date_time})
+        User.change_plan(self, username, "Gold")
+       
 
     def deactive(self, username):
         User.change_plan(self, username, "Bronze")
@@ -68,12 +65,12 @@ class Gold(ABC):
 
         users_data = BankAccount.json_import(USERS_JSON)
 
-        if users_data[username]["credit"] == 0:
-            Silver.deactive(self, username)
+        if datetime.now() - users_data[username]["start_date"] > timedelta(days = 30): 
+            Gold.deactive(self, username)
             return False
         else:
-            discount_cost = (cost * (1 - Silver.DISCOUNT))
-            if BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost):
-                users_data[username]["credit"] -= 1
-                users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
-                BankAccount.json_save(USERS_JSON, users_data)
+            discount_cost = (cost * (1 - Gold.DISCOUNT))
+            BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost)
+            users_data[username]["credit"] -= 1
+            users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
+            BankAccount.json_save(USERS_JSON, users_data)

@@ -87,3 +87,9 @@ class AlreadyExistAccount(Exception):
 
 class AddTicketFailed(Exception):
     """raised when add ticket for film failed."""
+
+class BuySilverFailed(Exception):
+    """Buy Silver Failed"""
+
+class BuyGoldFailed(Exception):
+    """Buy Gold Failed"""
