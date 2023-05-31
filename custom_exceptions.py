@@ -56,6 +56,29 @@ class UnsuccessfulDeposit(Exception):
     When deposit was unsuccessful.
     """
 
+class UnsuccessfulIdDeposit(Exception):
+    """
+    Use This Error for wrong ID
+    """
+
+
+class UnsuccessfulAccountDeposit(Exception):
+    """
+    Use this Error for wrong Account Name
+    """
+
+
+class UnsuccessfulPasswordDeposit(Exception):
+    """
+    Use this Error for Wrong account Password
+    """
+
+
+class UnsuccessfulCvv2Deposit(Exception):
+    """
+    Use this Error for Wrong CVV2
+    """
+
 
 class UnsuccessfulWithdraw(Exception):
     """
