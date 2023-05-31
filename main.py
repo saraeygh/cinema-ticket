@@ -263,37 +263,36 @@ while 1:
                         os.system(clear_cmd)
                         print("\nFilm added successfully! \n")
 
+                    # Remove film - Checked: OK.
                     elif stat == "2":
                         print("********** ^ Remove Film ^ **********")
                         film_name = input("Enter Film Name to Remove: ")
                         try:
                             Admin.remove_film(film_name)
                         except FilmError:
+                            os.system(clear_cmd)
                             print("Film with this Name not found for Remove! ")
+                            continue
                         else:
+                            os.system(clear_cmd)
                             print("Film Removed Successfully! ")
 
+                    # Add ticket - Checked: OK.
                     elif stat == "3":
                         print("***** ^ Add Ticket ^ *****")
                         film_name = input("Enter Film Name: ")
-                        year, month, day = input(
-                            "Enter scene date (YYYY-MM-DD): "
-                        ).split("-")
-                        film_date = datetime.date(
-                            int(year), int(month), int(day)
-                        ).isoformat()
+                        year, month, day = input("Enter scene date (YYYY-MM-DD): ").split("-")
+                        film_date = datetime.date(int(year), int(month), int(day)).isoformat()
                         hour, minute = input("Enter Scene time (HH:MM): ").split(":")
-                        scene_time = datetime.time(
-                            hour=int(hour), minute=int(minute)
-                        ).isoformat(timespec="minutes")
+                        scene_time = datetime.time(hour = int(hour), minute=int(minute)).isoformat(timespec="minutes")
                         ticket_capacity = int(input("Enter the Scene Capacity: "))
                         try:
-                            Admin.add_show(
-                                film_name, film_date, scene_time, ticket_capacity
-                            )
+                            Admin.add_show(film_name, film_date, scene_time, ticket_capacity)
                         except Exception:
+                            os.system(clear_cmd)
                             print("Invalid truncation, please Try again.")
                         else:
+                            os.system(clear_cmd)
                             print("\nTicket Added Successfully! \n")
 
                     elif stat == "4":

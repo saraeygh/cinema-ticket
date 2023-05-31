@@ -126,16 +126,16 @@ class BankAccount:
             BankAccount(national_id, account_name, balance, password)
             Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
             BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-            Client.clients_info = {}
-            BankAccount.accounts_dict = {}
+            Client.clients_info.clear()
+            BankAccount.accounts_dict.clear()
         elif account_name in Client.clients_info[national_id]["accounts"]:
             raise custom_exceptions.AlreadyExistAccount("Account name already exists.")
         else:
             BankAccount(national_id, account_name, balance, password)
             Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
             BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-            Client.clients_info = {}
-            BankAccount.accounts_dict = {}
+            Client.clients_info.clear()
+            BankAccount.accounts_dict.clear()
 
 
     @staticmethod
@@ -287,9 +287,6 @@ class BankAccount:
         cvv2: {self.cvv2}
         """
 
-if not os.path.exists(BankAccount.FILENAME):
-        os.makedirs(os.path.dirname(BankAccount.FILENAME), exist_ok=True)
-        BankAccount.json_save(BankAccount.FILENAME, {})
 
 def main():
     BankAccount.withdraw("2210240001", "melli", "1234", 6983, 50000)
