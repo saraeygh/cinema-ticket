@@ -13,7 +13,8 @@ from custom_exceptions import (
     TwoPasswordError,
     ShortPasswordError,
     FilmError,
-    PhoneNumberError
+    PhoneNumberError,
+    AddTicketFailed
 )
 from human import Human, User, Admin
 
@@ -288,28 +289,34 @@ while 1:
                         ticket_capacity = int(input("Enter the Scene Capacity: "))
                         try:
                             Admin.add_show(film_name, film_date, scene_time, ticket_capacity)
-                        except Exception:
+                        except AddTicketFailed:
                             os.system(clear_cmd)
-                            print("Invalid truncation, please Try again.")
+                            print("Incorrect data, please check information.")
                         else:
                             os.system(clear_cmd)
                             print("\nTicket Added Successfully! \n")
 
+                    # Admin info - Checked: OK.
                     elif stat == "4":
+                        os.system(clear_cmd)
                         print(admin_object)
 
+                    # Edit admin info - Checked: OK
                     elif stat == "5":
                         print("********** ^ admin Edit Username ^ **********")
-                        print("abort change any item, leave it and Enter.\n")
+                        print("To abort changes, leave it blank.\n")
                         new_username = input("Enter New Username: ")
                         new_ph_numb = input("Enter New Phone Number: ")
                         try:
                             admin_object.edit_user(new_username, new_ph_numb)
                         except RepUserError:
+                            os.system(clear_cmd)
                             print("\nUsername already Taken! ")
                         except PhoneNumberError:
+                            os.system(clear_cmd)
                             print("Invalid Phone Number format! ")
                         else:
+                            os.system(clear_cmd)
                             print("\nUser Information has been Updated! ")
 
                     elif stat == "6":

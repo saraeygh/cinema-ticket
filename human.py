@@ -542,7 +542,7 @@ class Admin(Human):
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername:\
+        return f"\nAdmin Information:\n\tUsername:\
                 {self.username}\n\tUser ID: {self.user_id}"
 
     @classmethod
