@@ -2,6 +2,16 @@
 
 import json
 from custom_exceptions import FilmError, NoCapacityError
+import logging
+
+
+logger = logging.getLogger(__name__)
+file_h = logging.FileHandler("./log/movie.log")
+
+file_f = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s-%(massage)s')
+file_h.setFormatter(file_f)
+file_h.setLevel(logging.INFO)
+logger.addHandler(file_h)
 
 
 class Film:
