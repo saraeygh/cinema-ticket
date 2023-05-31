@@ -336,7 +336,7 @@ class User(Human):
         for i, j in cls.dictionary.items():
             if i == username:
                 our_obj = cls(j["fname"], j["lname"], j["_username"],
-                              password, j["birth_date"], j["phone_number"],
+                              password, j["birth_date"], j["_phone_number"],
                               j["user_id"], j["join_date"], j["current_plan"],
                               j["wallet"], j["bank_accounts"])
                 return our_obj
