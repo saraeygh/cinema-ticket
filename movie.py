@@ -1,12 +1,18 @@
 #! /usr/bin/python3
 
-import json
+import json, os
+from bank_accounts import BankAccount
 from custom_exceptions import FilmError, NoCapacityError
 import logging
 
+log_file = "./log/movie.log"
+json_file = "./database/films.json"
+
+if not os.path.exists(log_file):
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
 logger = logging.getLogger(__name__)
-file_h = logging.FileHandler("./log/movie.log")
+file_h = logging.FileHandler(log_file)
 
 file_f = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s-%(massage)s')
 file_h.setFormatter(file_f)
@@ -20,7 +26,7 @@ class Film:
     """
     films = {}
 
-    def __init__(self, name: str, genre: str, age_rating: str, tickets: dict):
+    def __init__(self, name: str, genre: str, age_rating: str, tickets: dict = {}):
         self.name = name
         self.genre = genre
         self.age_rating = age_rating
@@ -36,7 +42,7 @@ class Film:
                 tickets data in the dictionary\
                 from a json file called database/films.json
         """
-        with open("./database/films.json", mode="r", encoding="utf-8") as file:
+        with open(json_file, mode="r", encoding="utf-8") as file:
             return json.load(file)
 
     @classmethod
@@ -46,15 +52,15 @@ class Film:
                 tickets data in the dictionary\
                 into a json file called database/films.json
         """
-        with open("./database/films.json", mode="w+", encoding="utf-8") as file:
-            json.dump(dictionary, file, indent=4)
+        with open(json_file, mode="w+", encoding="utf-8") as file:
+            json.dump(dictionary, file, indent = 4)
 
     @classmethod
     def add_film(cls, name: str, genre: str, age_rating: str):
         """
         This class method is for adding a film and its ticket.
         """
-        obj = cls(name, genre, age_rating, Ticket.ticket_dict)
+        obj = cls(name, genre, age_rating)
         obj.delete_film_obj()
 
     @classmethod
@@ -95,12 +101,15 @@ class Ticket(Film):
         self.scene_date = scene_date
         self.showtime = showtime
         self.available_seats = capacity
-        Ticket.ticket_dict.update(
-            {f"{self.scene_date} _ {self.showtime}": self.__dict__}
-        )
+        Ticket.ticket_dict.update({f"{self.scene_date} _ {self.showtime}": self.__dict__})
+        Film.films = Film.load_films_from_json()
+        Ticket.ticket_dict.update(Film.films[name]["tickets"])
+        Film.films[name]["tickets"] = Ticket.ticket_dict
+
         for film, info in Film.films.items():
             if film == self.name:
                 info["tickets"].update(Ticket.ticket_dict)
+        
         Film.save_films_to_json(Film.films)
 
     @staticmethod
@@ -108,7 +117,6 @@ class Ticket(Film):
         """
         This method is for adding a ticket from a defined film
         """
-        Ticket.ticket_dict.clear()
         t_obj = Ticket(name, scene_date, showtime, capacity)
         t_obj.delete_film_obj()
 
