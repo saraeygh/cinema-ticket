@@ -104,18 +104,21 @@ while 1:
                 try:
                     user_object = User.sign_in_validation(username, password)
                 except UserError:
+                    os.system(clear_cmd)
                     print("\nUsername not Found! ")
                     continue
                 except PasswordError:
+                    os.system(clear_cmd)
                     print("\nWrong Password! ")
                     continue
                 else:
+                    os.system(clear_cmd)
                     print("\nSigning In Completed! ")
 
                 while 1:
                     print("\n************ - User Dashboard - ************\n")
                     stat = input(
-                        "Stat (1(Show User Information) - 2(Edit) - 3(Show Tickets menu) - 4(Reserve Ticket) - 5(Cahrge Wallet) - 6(Back to Main Menu)):   "
+                        "State:\n1 - Show User Information\n2 - Edit user info\n3 - Show available Tickets\n4 - Reserve Ticket\n5 - Charge Wallet\n0 - Back to Main Menu: "
                     )
                     if stat == "1":
                         print(user_object)
@@ -196,7 +199,7 @@ while 1:
                     elif stat == "5":
                         print("***** ^ Wallet Charge Menu ^ *****")
 
-                    elif stat == "6":
+                    elif stat == "0":
                         print("\nExiting User Panel...")
                         user_object.delete_user()
                         break
@@ -319,22 +322,25 @@ while 1:
                             os.system(clear_cmd)
                             print("\nUser Information has been Updated! ")
 
+                    # Change admin password - Checked: OK
                     elif stat == "6":
                         print("\n********** ^ Password Change ^ **********\n")
                         old_pass = getpass("Enter Old Password: ")
                         new_pass = getpass("Enter New Password: ")
                         rep_new_pass = getpass("Enter New Password again: ")
                         try:
-                            admin_object.password_change(
-                                old_pass, new_pass, rep_new_pass
-                            )
+                            admin_object.password_change(old_pass, new_pass, rep_new_pass)
                         except PasswordError:
-                            print("\nWrong Original Password! ")
+                            os.system(clear_cmd)
+                            print("\nWrong Old Password! ")
                         except TwoPasswordError:
-                            print("\nTwo new passwords are not matched! ")
+                            os.system(clear_cmd)
+                            print("\nTwo new passwords doesnt match! ")
                         except ShortPasswordError:
-                            print("Two Short New Password! ")
+                            os.system(clear_cmd)
+                            print("New Password is too short! ")
                         else:
+                            os.system(clear_cmd)
                             print("\nYour Password has been changed! ")
 
 
@@ -355,6 +361,7 @@ while 1:
                 break
 
             else:
+                os.system(clear_cmd)
                 print("\nInvalid State! ")
                 continue
 
