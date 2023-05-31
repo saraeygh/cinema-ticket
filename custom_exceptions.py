@@ -50,12 +50,32 @@ class FileError(Exception):
     I use this Error When File Not Found.
     """
 
+
 class UnsuccessfulDeposit(Exception):
     """
     When deposit was unsuccessful.
     """
 
+
 class UnsuccessfulWithdraw(Exception):
     """
     When Withdraw was unsuccessful.
+    """
+
+
+class FilmError(Exception):
+    """
+    I use this Error when Film Not found.
+    """
+
+
+class NoCapacityError(Exception):
+    """
+    I use this Error when No sufficient tickets available.
+    """
+
+
+class PhoneNumberError(Exception):
+    """
+    I use this Error when invalid phone number format has entered.
     """
