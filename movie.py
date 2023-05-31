@@ -8,6 +8,7 @@ class Film:
     """
     This class is for modeling film.
     """
+
     def __init__(self, name: str, genre: str, age_rating: str, tickets: dict):
         self.name = name
         self.genre = genre
@@ -34,18 +35,16 @@ class Film:
                 tickets data in the dictionary\
                 into a json file called database/films.json
         """
-        with open("./database/films.json",
-                  mode="w+", encoding="utf-8") as file:
+        with open("./database/films.json", mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @classmethod
-    def add_film(cls, name: str, genre: str,
-                 age_rating: str, scene_date, showtime, capacity):
+    def add_film(cls, name: str, genre: str, age_rating: str):
         """
         This class method is for adding a film and its ticket.
         """
-        cls(name, genre, age_rating, Ticket.ticket_dict)
-        Ticket(name, scene_date, showtime, capacity)
+        obj = cls(name, genre, age_rating, Ticket.ticket_dict)
+        obj.delete_film_obj()
 
     @classmethod
     def get_object(cls, name):
@@ -56,10 +55,10 @@ class Film:
         """
         for i, j in Film.films.items():
             if i == name:
-                return cls(j["name"],
-                           j["genre"],
-                           j["age_rating"],
-                           j["tickets"])
+                return cls(j["name"], j["genre"], j["age_rating"], j["tickets"])
+
+    def delete_film_obj(self):
+        del self
 
     @classmethod
     def remove_film(cls, name: str):
@@ -85,7 +84,9 @@ class Ticket(Film):
         self.scene_date = scene_date
         self.showtime = showtime
         self.available_seats = capacity
-        Ticket.ticket_dict.update({f"{self.scene_date} _ {self.showtime}": self.__dict__})
+        Ticket.ticket_dict.update(
+            {f"{self.scene_date} _ {self.showtime}": self.__dict__}
+        )
         for film, info in Film.films.items():
             if film == self.name:
                 info["tickets"] = Ticket.ticket_dict
@@ -96,7 +97,8 @@ class Ticket(Film):
         """
         This method is for adding a ticket from a defined film
         """
-        return Ticket(name, scene_date, showtime, capacity)
+        t_obj = Ticket(name, scene_date, showtime, capacity)
+        t_obj.delete_film_obj()
 
     def sell_ticket(self, quantity):
         """
@@ -113,3 +115,6 @@ class Ticket(Film):
             print(f"{quantity} ticket(s) sold successfully.")
         else:
             raise NoCapacityError("Insufficient ticket! ")
+
+    def delete_ticket_obj(self):
+        del self
