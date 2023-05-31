@@ -73,3 +73,9 @@ class NoCapacityError(Exception):
     """
     I use this Error when No sufficient tickets available.
     """
+
+
+class PhoneNumberError(Exception):
+    """
+    I use this Error when invalid phone number format has entered.
+    """
