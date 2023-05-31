@@ -4,6 +4,8 @@ database/admins.json
 database/films.json
 test_database
 log/
+.bank_accounts.py.swp
+.human.py.swp
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
