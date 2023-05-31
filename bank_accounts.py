@@ -1,31 +1,9 @@
 import os
 import hashlib
 import json
-import logging
 from datetime import datetime
 import random
 import custom_exceptions
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("%(asctime)s: %(levelname)s: %(message)s")
-
-os.makedirs(os.path.dirname("./log/bank_accounts.log"), exist_ok=True)
-file_handler = logging.FileHandler("./log/bank_accounts.log")
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-
-"""
-Imported random to generate CVV2.
-Imported custom_exceptions to customize raised exceptions.
-Imported human module to use its methods.
-Imported datetime module to capture account creation timestamp.
-"""
-
 
 class Client:
     FILENAME = "./database/bank_accounts.json"
@@ -36,9 +14,7 @@ class Client:
     ):
         if Client.national_id_valid(national_id):
             self.national_id = national_id
-            logger.debug(f"{self.national_id} was valid.")
         else:
-            logger.debug(f"{national_id} was not valid.")
             raise custom_exceptions.InvalidNationalID("Invalid ID.")
         self.first_name = first_name
         self.last_name = last_name
@@ -107,14 +83,14 @@ class BankAccount:
             self.cvv2 = cvv2
         else:
             self.cvv2 = random.randint(1111, 9999)
+        
         BankAccount.accounts_dict.update({self.account_name: self.__dict__})
         Client.clients_info[self.national_id]["accounts"].update(
             BankAccount.accounts_dict
         )
 
-    @classmethod
+    @staticmethod
     def create_account(
-        cls,
         national_id: int,
         account_name: str,
         first_name: str,
@@ -131,13 +107,16 @@ class BankAccount:
             balance (float): User inputed balance.
             password (str): User inputed password.
         """
+        Client.clients_info = BankAccount.json_import(BankAccount.FILENAME)
+
         if national_id not in Client.clients_info:
             Client(national_id, first_name, last_name)
-            BankAccount(national_id, account_name, balance, password)
+            new_account = BankAccount(national_id, account_name, balance, password)
+            Client.clients_info.update({new_account.national_id: new_account.__dict__})
         else:
-            Client.clients_info = BankAccount.json_import(BankAccount.FILENAME)
             BankAccount.accounts_dict = Client.clients_info[national_id]["accounts"]
             BankAccount(national_id, account_name, balance, password)
+            Client.clients_info[national_id]["accounts"] = BankAccount.accounts_dict
 
     @staticmethod
     def hashing(password: str):
@@ -184,11 +163,7 @@ class BankAccount:
             custom_exceptions.BalanceMinimum: If balance goes down the min limit.
         """
         if balance < BankAccount.MIN_BALANCE:
-            logger.debug(
-                f"Balance can not be less that Minimum {BankAccount.MIN_BALANCE}."
-            )
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
-        logger.debug(f"Set balance = {self.balance} for national ID {self.national_id}")
         self._balance = balance
 
     @staticmethod
@@ -214,11 +189,7 @@ class BankAccount:
             password (str): Inputed password.
         """
         if not BankAccount.password_check(password):
-            logger.debug(
-                f"Password was short and not changed for national ID {self.national_id}"
-            )
             raise custom_exceptions.ShortPasswordError("Too short Password!")
-        logger.debug(f"Password changed for national ID {self.national_id}")
         password = BankAccount.hashing(password)
         self.__password = password
 
@@ -235,13 +206,11 @@ class BankAccount:
         accounts_info = BankAccount.json_import(BankAccount.FILENAME)
 
         if national_id not in accounts_info:
-            logger.debug(f"Unsuccessful deposit, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulDeposit(
                 "Unsuccessful deposit, national ID not found."
             )
 
         if account_name not in accounts_info[national_id]:
-            logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit(
                 "Unsuccessful deposit, No such account."
             )
@@ -250,13 +219,11 @@ class BankAccount:
             BankAccount.hashing(password)
             != accounts_info[national_id][account_name]["_BankAccount__password"]
         ):
-            logger.debug(f"Unsuccessful deposit, Wrong password.")
             raise custom_exceptions.UnsuccessfulDeposit(
                 "Unsuccessful deposit, Wrong password."
             )
 
         if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
-            logger.debug(f"Unsuccessful deposit, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulDeposit(
                 "Unsuccessful deposit, Wrong CVV2."
             )
@@ -265,14 +232,8 @@ class BankAccount:
             accounts_info[national_id][account_name]["_balance"] + amount
             < BankAccount.MIN_BALANCE
         ):
-            logger.debug(
-                f"Unsuccessful deposit, Balance cant be less than {BankAccount.MIN_BALANCE}."
-            )
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
 
-        logger.debug(
-            f"Successfully deposited {amount} to {national_id}-{account_name} bank account."
-        )
         accounts_info[national_id][account_name]["_balance"] += amount
         BankAccount.json_save(BankAccount.FILENAME, accounts_info)
 
@@ -288,12 +249,10 @@ class BankAccount:
         """
         accounts_info = BankAccount.json_import(BankAccount.FILENAME)
         if national_id not in accounts_info:
-            logger.debug(f"Unsuccessful withdraw, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulWithdraw(
                 "Unsuccessful withdraw, national ID not found."
             )
         if account_name not in accounts_info[national_id]:
-            logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit(
                 "Unsuccessful deposit, No such account."
             )
@@ -301,12 +260,10 @@ class BankAccount:
             BankAccount.hashing(password)
             != accounts_info[national_id][account_name]["_BankAccount__password"]
         ):
-            logger.debug(f"Unsuccessful withdraw, Wrong password.")
             raise custom_exceptions.UnsuccessfulWithdraw(
                 "Unsuccessful withdraw, Wrong password."
             )
         if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
-            logger.debug(f"Unsuccessful Withdraw, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulWithdraw(
                 "Unsuccessful Withdraw, Wrong CVV2."
             )
@@ -314,14 +271,8 @@ class BankAccount:
             accounts_info[national_id][account_name]["_balance"] - amount
             < BankAccount.MIN_BALANCE
         ):
-            logger.debug(
-                f"Unsuccessful Withdraw, Balance cant be less than {BankAccount.MIN_BALANCE}."
-            )
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
 
-        logger.debug(
-            f"Successfully Withdrawed {amount} from {national_id}-{account_name} bank account."
-        )
         accounts_info[national_id][account_name]["_balance"] -= amount
         BankAccount.json_save(BankAccount.FILENAME, accounts_info)
 
@@ -339,16 +290,13 @@ class BankAccount:
 
 
 def main():
-    if not os.path.isdir("./database"):
-        os.mkdir("./database")
 
-    if os.path.exists(BankAccount.FILENAME):
-        Client.clients_info = BankAccount.json_import(BankAccount.FILENAME)
-    else:
+    if not os.path.exists(BankAccount.FILENAME):
+        os.makedirs(os.path.dirname(BankAccount.FILENAME), exist_ok=True)
         BankAccount.json_save(BankAccount.FILENAME, {})
 
     BankAccount.create_account(
-        "1234567890", "Melli", "Reza", "Saraey", 100_000, "mynameisreza"
+        "1234567890", "Melli", "Reza", "Saraey", 100_000, "1234"
     )
 
 
