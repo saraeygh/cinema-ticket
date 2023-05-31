@@ -6,12 +6,14 @@ import uuid
 import hashlib
 import json
 import pathlib
+from movie import Film, Ticket
 from custom_exceptions import (
     UserError,
     RepUserError,
     ShortPasswordError,
     PasswordError,
-    TwoPasswordError
+    TwoPasswordError,
+    PhoneNumberError
 )
 
 
@@ -173,6 +175,25 @@ class Human(ABC):
     @password.setter
     @abstractmethod
     def password(self, password_value):
+        pass
+
+    @staticmethod
+    def phone_number_check(phone_number):
+        if (phone_number[:2] == "09") and (len(phone_number) == 11):
+            return True
+        return False
+
+    @property
+    @abstractmethod
+    def phone_number(self):
+        """
+        Getter for Phone Number
+        """
+        pass
+
+    @phone_number.setter
+    @abstractmethod
+    def phone_number(self, ph_value):
         pass
 
     @staticmethod
@@ -438,6 +459,19 @@ class User(Human):
         key_value = Human.hashing(passwd_value)
         self.__password = key_value
 
+    @property
+    def phone_number(self):
+        """
+        Getter for Phone Number
+        """
+        return self._phone_number
+
+    @phone_number.setter
+    def phone_number(self, ph_value):
+        if not User.phone_number_check(ph_value):
+            raise PhoneNumberError("Invalid Phone Number Format! ")
+        self._phone_number = ph_value
+
     def delete_user(self):
         """
         This function is for deleting an object/
@@ -481,29 +515,26 @@ class Admin(Human):
             if i == username:
                 return cls(j["_username"], password, j["user_id"])
 
-    def add_show(self):
+    @staticmethod
+    def add_show(name, scene_date, showtime, capacity):
         """
         Implementing add a show here
         """
-        pass
+        Ticket.add_ticket(name, scene_date, showtime, capacity)
 
-    def remove_film(self):
+    @staticmethod
+    def remove_film(name):
         """
         Implementing remove a film here
         """
-        pass
+        Film.remove_film(name)
 
-    def add_film(self):
+    @staticmethod
+    def add_film(name, genre, age_rating):
         """
         Implementing add a film here
         """
-        pass
-
-    def edit_film(self):
-        """
-        Implementing edit a film here
-        """
-        pass
+        Film.add_film(name, genre, age_rating)
 
     def __str__(self):
         """
