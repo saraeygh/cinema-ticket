@@ -4,6 +4,13 @@ import json, os
 from bank_accounts import BankAccount
 from custom_exceptions import FilmError, NoCapacityError
 import logging
+import os
+
+log_file = "./log/movie.log"
+json_file = "./database/films.json"
+
+if not os.path.exists(log_file):
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
 log_file = "./log/movie.log"
 json_file = "./database/films.json"
