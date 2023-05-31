@@ -6,7 +6,6 @@ import platform
 from datetime import datetime
 import random
 import custom_exceptions
-from human import Human
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -36,7 +35,6 @@ class BankAccount:
     """
     FILENAME = "./database/bank_accounts.json"
     MIN_BALANCE = 10_000
-    accounts_dict = {}
 
     def __init__(
         self,
@@ -84,12 +82,19 @@ class BankAccount:
         return hashed_pass
 
     @staticmethod
-    def json_import(filename, dictionary):
+    def json_save(filename, dictionary):
+        """
+        This method is use for saving a dictionary into a json file
+        """
         with open(filename, mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @staticmethod
-    def json_save(filename) -> dict:
+    def json_import(filename) -> dict:
+        """
+        This method is used for importing data from a json file/
+        and assign it to our class dictionary
+        """
         with open(filename, mode="r", encoding="utf-8") as file:
             return json.load(file)
 
@@ -132,6 +137,12 @@ class BankAccount:
         logger.debug(f"Set balance = {self._balance} for national ID {self.national_id}")
         self._balance = balance
 
+    @staticmethod
+    def password_check(password: str) -> bool:
+        if len(password) < 4:
+            return False
+        return True
+
     @property
     def password(self) -> str:
         """Password Getter
@@ -148,11 +159,11 @@ class BankAccount:
         Args:
             password (str): Inputed password.
         """
-        if not Human.password_check(password):
+        if not BankAccount.password_check(password):
             logger.debug(f"Password was short and not changed for national ID {self.national_id}")
             raise custom_exceptions.ShortPasswordError("Too short Password!")
         logger.debug(f"Password changed for national ID {self.national_id}")
-        password = Human.hashing(password)
+        password = BankAccount.hashing(password)
         self.__password = password
 
     @staticmethod
@@ -165,19 +176,24 @@ class BankAccount:
         Raises:
             custom_exceptions.BalanceMinimum: If balance goes down the min limit.
         """
-        accounts_info = Human.json_import(BankAccount.FILENAME)
+        accounts_info = BankAccount.json_import(BankAccount.FILENAME)
+
         if national_id not in accounts_info:
             logger.debug(f"Unsuccessful deposit, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, national ID not found.")
+
         if account_name not in accounts_info[national_id]:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
+
         if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
             logger.debug(f"Unsuccessful deposit, Wrong password.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
+
         if cvv2 != accounts_info[national_id][account_name]["cvv2"]:
             logger.debug(f"Unsuccessful deposit, {cvv2} for CVV2 is wrong.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong CVV2.")
+
         if accounts_info[national_id][account_name]["_balance"] + amount < BankAccount.MIN_BALANCE:
             logger.debug(f"Unsuccessful deposit, Balance cant be less than {BankAccount.MIN_BALANCE}.")
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
@@ -217,8 +233,9 @@ class BankAccount:
         accounts_info[national_id][account_name]["_balance"] -= amount
         Human.json_save(BankAccount.FILENAME, accounts_info)
 
-    @staticmethod
+    @classmethod
     def create_account(
+        cls,
         national_id: int,
         account_name: str,
         first_name: str,
@@ -235,20 +252,23 @@ class BankAccount:
             balance (float): User inputed balance.
             password (str): User inputed password.
         """
-        new_account = BankAccount(national_id, account_name, first_name, last_name, balance, password)
+        new_account = cls(national_id, account_name, first_name, last_name, balance, password)
+
         if not os.path.exists(BankAccount.FILENAME):
-            Human.json_create(BankAccount.FILENAME)
+            cls.json_save(BankAccount.FILENAME, {})
             logger.debug("Created bank accounts JSON database.")
-        data = Human.json_import(BankAccount.FILENAME)
+        data = cls.json_import(BankAccount.FILENAME)
         logger.debug("Read accounts info from JSON database.")
+
         if national_id in data:
             accounts = data[new_account.national_id]
             accounts.update({new_account.account_name: new_account.__dict__})
             data.update({new_account.national_id: accounts})
+
         else:
             data.update({new_account.national_id: {new_account.account_name: new_account.__dict__}})
             logger.debug("Added new bank account to JSON database.")
-        Human.json_save(BankAccount.FILENAME, data)
+        cls.json_save(BankAccount.FILENAME, data)
 
     def __str__(self) -> str:
         """Cutomize print output of object."""
@@ -332,6 +352,7 @@ def main():
                 os.system(clear_cmd)
             case "4":
                 break
-    
+
+
 if __name__ == "__main__":
     main()
