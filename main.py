@@ -185,20 +185,14 @@ while 1:
 
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
-                    stat = input("Stat (1(Add film) - 2(Remove film) - 3(Show Your Information) - 4(Edit Username) - 5(Password Change) - 6(Back to Main Menu)):   ")
+                    stat = input("Stat (1(Add film) - 2(Remove film) - 3(Add Ticket) - 4(Show Your Information) - 5(Edit Username) - 6(Password Change) - 7(Back to Main Menu)):   ")
                     if stat == "1":
                         print("\n************** ^ Add film ^ **************\n")
                         film_name = input("Enter Film name: ")
                         film_genre = input("Enter Film Genre (Comedy/Action/Family/Romance): ")
                         age_rate = input("Enter film Age Rating: ")
-                        year, month, day = input("Enter scene date (YYYY-MM-DD): ").split("-")
-                        film_date = datetime.date(int(year), int(month), int(day)).isoformat()
-                        hour, minute = input("Enter Scene time (HH:MM): ")
-                        scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
-                        ticket_capacity = int(input("Enter the Scene Capacity: "))
-                        Film.add_film(film_name, film_genre, age_rate,
-                                      film_date, scene_time, ticket_capacity)
-                        print("\nFilm added successfully! \n")
+                        Admin.add_film(film_name, film_genre, age_rate)
+                       print("\nFilm added successfully! \n")
 
                     elif stat == "2":
                         print("********** ^ Remove Film ^ **********")
@@ -211,9 +205,19 @@ while 1:
                             print("Film Removed Successfully! ")
 
                     elif stat == "3":
-                        print(admin_object)
+                        print("***** ^ Add Ticket ^ *****")
+                        film_name = input("Enter Film Name")
+                        year, month, day = input("Enter scene date (YYYY-MM-DD): ").split("-")
+                        film_date = datetime.date(int(year), int(month), int(day)).isoformat()
+                        hour, minute = input("Enter Scene time (HH:MM): ")
+                        scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
+                        ticket_capacity = int(input("Enter the Scene Capacity: "))
+ 
 
                     elif stat == "4":
+                        print(admin_object)
+
+                    elif stat == "5":
                         print("********** ^ admin Edit Username ^ **********")
                         print("abort change any item, leave it and Enter.\n")
                         new_username = input("Enter New Username: ")
@@ -224,7 +228,7 @@ while 1:
                         else:
                             print("\nUser Information has been Updated! ")
 
-                    elif stat == "5":
+                    elif stat == "6":
                         print("\n********** ^ Password Change ^ **********\n")
                         old_pass = getpass("Enter Old Password: ")
                         new_pass = getpass("Enter New Password: ")
@@ -240,7 +244,7 @@ while 1:
                         else:
                             print("\nYour Password has been changed! ")
 
-                    elif stat == "6":
+                    elif stat == "7":
                         print("\nExiting Admin Panel...")
                         admin_object.delete_admin()
                         break
