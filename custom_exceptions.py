@@ -79,3 +79,8 @@ class PhoneNumberError(Exception):
     """
     I use this Error when invalid phone number format has entered.
     """
+
+class AlreadyExistAccount(Exception):
+    """
+    when account name already exists.
+    """

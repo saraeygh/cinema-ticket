@@ -18,7 +18,6 @@ class Client:
         self.first_name = first_name
         self.last_name = last_name
         self.accounts = accounts
-        print(self.__dict__)
         Client.clients_info.update({self.national_id: self.__dict__})
 
     @staticmethod
@@ -111,15 +110,15 @@ class BankAccount:
 
         if national_id not in Client.clients_info:
             Client(national_id, first_name, last_name)
-            new_account = BankAccount(national_id, account_name, balance, password)
-            Client.clients_info.update({new_account.national_id: new_account.__dict__})
-            BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-        else:
-            BankAccount.accounts_dict = Client.clients_info[national_id]["accounts"]
             BankAccount(national_id, account_name, balance, password)
-            Client.clients_info[national_id]["accounts"] = BankAccount.accounts_dict
+            Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
             BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-
+        elif account_name in Client.clients_info[national_id]["accounts"]:
+            raise custom_exceptions.AlreadyExistAccount("Account name already exists.")
+        else:
+            BankAccount(national_id, account_name, balance, password)
+            Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
+            BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
 
 
     @staticmethod
@@ -300,7 +299,7 @@ def main():
         BankAccount.json_save(BankAccount.FILENAME, {})
 
     BankAccount.create_account("2210240344", "melli", "reza", "saraey", 100_000, "1234")
-    Client("2210240345", "rezaa", "sara")
+    BankAccount.create_account("2210240344", "sepah", "reza", "saraey", 100_000, "1234")
 
 if __name__ == "__main__":
     main()
