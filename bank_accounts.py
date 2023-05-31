@@ -5,12 +5,17 @@ from datetime import datetime
 import random
 import custom_exceptions
 
+
 class Client:
+    """
+    This class is for modeling Clients of our bank database
+    """
     FILENAME = "./database/bank_accounts.json"
     clients_info = {}
 
-    def __init__(self, national_id: str, first_name: str, last_name: str, accounts: dict = {}):
-
+    def __init__(
+        self, national_id: str, first_name: str, last_name: str, accounts: dict = {}
+    ):
         if Client.national_id_valid(national_id):
             self.national_id = national_id
         else:
@@ -33,7 +38,7 @@ class Client:
         if len(national_id) != 10:
             return False
         return True
-    
+
     def __str__(self) -> str:
         """Cutomize print output of object."""
         return f"""
@@ -91,7 +96,7 @@ class BankAccount:
             self.cvv2 = cvv2
         else:
             self.cvv2 = random.randint(1111, 9999)
-        
+
         BankAccount.accounts_dict.update({self.account_name: self.__dict__})
         Client.clients_info[self.national_id]["accounts"].update(
             BankAccount.accounts_dict
@@ -118,25 +123,24 @@ class BankAccount:
         if not os.path.exists(BankAccount.FILENAME):
             os.makedirs(os.path.dirname(BankAccount.FILENAME), exist_ok=True)
             BankAccount.json_save(BankAccount.FILENAME, {})
-        
+
         Client.clients_info = BankAccount.json_import(BankAccount.FILENAME)
 
         if national_id not in Client.clients_info:
             Client(national_id, first_name, last_name)
             BankAccount(national_id, account_name, balance, password)
-            Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
+            Client.clients_info[national_id]["accounts"].update(
+                BankAccount.accounts_dict
+            )
             BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-            Client.clients_info.clear()
-            BankAccount.accounts_dict.clear()
         elif account_name in Client.clients_info[national_id]["accounts"]:
             raise custom_exceptions.AlreadyExistAccount("Account name already exists.")
         else:
             BankAccount(national_id, account_name, balance, password)
-            Client.clients_info[national_id]["accounts"].update(BankAccount.accounts_dict)
+            Client.clients_info[national_id]["accounts"].update(
+                BankAccount.accounts_dict
+            )
             BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
-            Client.clients_info.clear()
-            BankAccount.accounts_dict.clear()
-
 
     @staticmethod
     def hashing(password: str):
@@ -226,20 +230,34 @@ class BankAccount:
         accounts_info = BankAccount.json_import(BankAccount.FILENAME)
 
         if national_id not in accounts_info:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, national ID not found.")
+            raise custom_exceptions.UnsuccessfulIdDeposit(
+                "Unsuccessful deposit, national ID not found."
+            )
 
         if account_name not in accounts_info[national_id]["accounts"]:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
+            raise custom_exceptions.UnsuccessfulAccountDeposit(
+                "Unsuccessful deposit, No such account."
+            )
 
         if (
-            BankAccount.hashing(password) != accounts_info[national_id]["accounts"][account_name]["_BankAccount__password"]
+            BankAccount.hashing(password)
+            != accounts_info[national_id]["accounts"][account_name][
+                "_BankAccount__password"
+            ]
         ):
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
+            raise custom_exceptions.UnsuccessfulAccountDeposit(
+                "Unsuccessful deposit, Wrong password."
+            )
 
         if cvv2 != accounts_info[national_id]["accounts"][account_name]["cvv2"]:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong CVV2.")
+            raise custom_exceptions.UnsuccessfulCvv2Deposit(
+                "Unsuccessful deposit, Wrong CVV2."
+            )
 
-        if (accounts_info[national_id]["accounts"][account_name]["_balance"] + amount < BankAccount.MIN_BALANCE):
+        if (
+            accounts_info[national_id]["accounts"][account_name]["_balance"] + amount
+            < BankAccount.MIN_BALANCE
+        ):
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
 
         accounts_info[national_id]["accounts"][account_name]["_balance"] += amount
@@ -258,25 +276,39 @@ class BankAccount:
         accounts_info = BankAccount.json_import(BankAccount.FILENAME)
 
         if national_id not in accounts_info:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, national ID not found.")
+            raise custom_exceptions.UnsuccessfulIdDeposit(
+                "Unsuccessful deposit, national ID not found."
+            )
 
         if account_name not in accounts_info[national_id]["accounts"]:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
+            raise custom_exceptions.UnsuccessfulAccountDeposit(
+                "Unsuccessful deposit, No such account."
+            )
 
         if (
-            BankAccount.hashing(password) != accounts_info[national_id]["accounts"][account_name]["_BankAccount__password"]
+            BankAccount.hashing(password)
+            != accounts_info[national_id]["accounts"][account_name][
+                "_BankAccount__password"
+            ]
         ):
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong password.")
+            raise custom_exceptions.UnsuccessfulPasswordDeposit(
+                "Unsuccessful deposit, Wrong password."
+            )
 
         if cvv2 != accounts_info[national_id]["accounts"][account_name]["cvv2"]:
-            raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, Wrong CVV2.")
+            raise custom_exceptions.UnsuccessfulCvv2Deposit(
+                "Unsuccessful deposit, Wrong CVV2."
+            )
 
-        if (accounts_info[national_id]["accounts"][account_name]["_balance"] - amount < BankAccount.MIN_BALANCE):
+        if (
+            accounts_info[national_id]["accounts"][account_name]["_balance"] - amount
+            < BankAccount.MIN_BALANCE
+        ):
             raise custom_exceptions.BalanceMinimum("Invalid balance.")
 
         accounts_info[national_id]["accounts"][account_name]["_balance"] -= amount
         BankAccount.json_save(BankAccount.FILENAME, accounts_info)
-        
+
     def __str__(self) -> str:
         """Cutomize print output of object."""
         return f"""
@@ -290,6 +322,7 @@ class BankAccount:
 
 def main():
     pass
+
 
 if __name__ == "__main__":
     main()

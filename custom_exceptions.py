@@ -56,6 +56,29 @@ class UnsuccessfulDeposit(Exception):
     When deposit was unsuccessful.
     """
 
+class UnsuccessfulIdDeposit(Exception):
+    """
+    Use This Error for wrong ID
+    """
+
+
+class UnsuccessfulAccountDeposit(Exception):
+    """
+    Use this Error for wrong Account Name
+    """
+
+
+class UnsuccessfulPasswordDeposit(Exception):
+    """
+    Use this Error for Wrong account Password
+    """
+
+
+class UnsuccessfulCvv2Deposit(Exception):
+    """
+    Use this Error for Wrong CVV2
+    """
+
 
 class UnsuccessfulWithdraw(Exception):
     """
@@ -85,9 +108,14 @@ class AlreadyExistAccount(Exception):
     when account name already exists.
     """
 
+
 class AddTicketFailed(Exception):
     """raised when add ticket for film failed."""
 
+class TicketError(Exception):
+    """
+    Ticket Error
+    """
 class BuySilverFailed(Exception):
     """Buy Silver Failed"""
 
