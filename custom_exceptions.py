@@ -108,5 +108,12 @@ class AlreadyExistAccount(Exception):
     when account name already exists.
     """
 
+
 class AddTicketFailed(Exception):
     """raised when add ticket for film failed."""
+
+
+class TicketError(Exception):
+    """
+    Ticket Error
+    """
