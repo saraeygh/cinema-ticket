@@ -321,11 +321,13 @@ class User(Human):
     
     def charge_bank_account(self, username, national_id, account_name, password, cvv2, amount):
         BankAccount.deposit(national_id, account_name, password, cvv2, amount)
-        User.dictionary[self.username]["bank_accounts"][account_name]["balance"] += amount
+        User.dictionary[self.username]["bank_accounts"][account_name]["_balance"] += amount
+        User.json_save(User.jsonpath, User.dictionary)
 
     def charge_wallet(self, national_id, account_name, password, cvv2, amount):
         BankAccount.withdraw(national_id, account_name, password, cvv2, amount)
         self.wallet += amount
+        User.json_save(User.jsonpath, User.dictionary)
 
     def compute_discount(self, username: str, price: float, ticket_date: str):
         """
@@ -365,7 +367,7 @@ class User(Human):
         This is a __str__ magic method for/
         returning user Information as a string
         """
-        return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}"
+        return f"\nUser Information:\n\tUsername: {self.username}\n\tPhone Number: {self.phone_number}\n\tUser ID: {self.user_id}\n\tJoin Date: {self.join_date}\n\tCurrent Plan: {self.current_plan}\n\tWallet: {self.wallet}"
 
     @classmethod
     def sign_in_validation(cls, user_name: str, password: str):
