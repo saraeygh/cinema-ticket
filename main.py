@@ -19,10 +19,10 @@ from custom_exceptions import (
     FilmError,
     AddTicketFailed,
     TicketError,
-    UnsuccesfulIdDeposit,
-    UnsuccesfulAccountDeposit,
-    UnsuccesfulPasswordDeposit,
-    UnsuccesfulCvv2Deposit,
+    UnsuccessfulIdDeposit,
+    UnsuccessfulAccountDeposit,
+    UnsuccessfulPasswordDeposit,
+    UnsuccessfulCvv2Deposit,
     BalanceMinimum
 )
 from human import Human, User, Admin
@@ -331,16 +331,16 @@ while 1:
                         except TicketError:
                             os.system(CLEAR_CMD)
                             print("ticket Not Found! ")
-                        except UnsuccesfulIdDeposit:
+                        except UnsuccessfulIdDeposit:
                             os.system(CLEAR_CMD)
                             print("National Id Not Found! ")
-                        except UnsuccesfulAccountDeposit:
+                        except UnsuccessfulAccountDeposit:
                             os.system(CLEAR_CMD)
                             print("Account Not Found! ")
-                        except UnsuccesfulPasswordDeposit:
+                        except UnsuccessfulPasswordDeposit:
                             os.system(CLEAR_CMD)
                             print("Wrong Password! ")
-                        except UnsuccesfulCvv2Deposit:
+                        except UnsuccessfulCvv2Deposit:
                             os.system(CLEAR_CMD)
                             print("Wrong CVV2")
                         except BalanceMinimum:
@@ -360,16 +360,16 @@ while 1:
                         amount = int(input("Enter Amount: "))
                         try:
                             user_object.charge_wallet(national_id, account_name, password, cvv2, amount)
-                        except UnsuccesfulIdDeposit:
+                        except UnsuccessfulIdDeposit:
                             os.system(CLEAR_CMD)
                             print("National Id Not Found! ")
-                        except UnsuccesfulAccountDeposit:
+                        except UnsuccessfulAccountDeposit:
                             os.system(CLEAR_CMD)
                             print("Account Not Found! ")
-                        except UnsuccesfulPasswordDeposit:
+                        except UnsuccessfulPasswordDeposit:
                             os.system(CLEAR_CMD)
                             print("Wrong Password! ")
-                        except UnsuccesfulCvv2Deposit:
+                        except UnsuccessfulCvv2Deposit:
                             os.system(CLEAR_CMD)
                             print("Wrong CVV2")
                         except BalanceMinimum:

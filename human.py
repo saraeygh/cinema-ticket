@@ -17,7 +17,7 @@ from custom_exceptions import (
     PasswordError,
     TwoPasswordError,
     PhoneNumberError,
-    FilmError.
+    FilmError,
     TicketError
 )
 
