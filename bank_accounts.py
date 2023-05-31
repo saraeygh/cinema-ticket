@@ -289,7 +289,7 @@ class BankAccount:
 
 
 def main():
-    BankAccount.withdraw("2210240001", "melli", "1234", 6983, 50000)
+    pass
 
 if __name__ == "__main__":
     main()
