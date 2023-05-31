@@ -1,52 +1,98 @@
 #! /usr/bin/python3
 
 import unittest
-from bank_accounts import BankAccount
-from custom_exceptions import BalanceMinimum
+from bank_accounts import BankAccount, Client
+import custom_exceptions
 from human import Human
 
 FILENAME = "./database/bank_accounts.json"
+
+class TestClient(unittest.TestCase):
+    
+    def test_national_id_valid(self):
+        valid_id = "9876543210"
+        invalid_id = "987654321"
+        self.assertTrue(Client.national_id_valid(valid_id))
+        self.assertFalse(Client.national_id_valid(invalid_id))
+
+
 class TestBankAccount(unittest.TestCase):
 
-    def test_national_id_valid(self):
-        valid_id = "2210010098"
-        invalid_id = "221001098"
-        self.assertTrue(BankAccount.national_id_valid(valid_id))
-        self.assertFalse(BankAccount.national_id_valid(invalid_id))
+    def test_create_account(self):
+        national_id = "0123456789"
+        account_name = "melli"
+        fname = "reza"
+        lname = "saraey"
+        balance = 50_000
+        password = "1234"
+        BankAccount.create_account(national_id, account_name, fname, lname, balance, password)
+        new_account = BankAccount.json_import(FILENAME)
+        self.assertEqual(new_account["0123456789"]["national_id"], "0123456789")
+        self.assertEqual(new_account["0123456789"]["first_name"], "reza")
+        self.assertEqual(new_account["0123456789"]["last_name"], "saraey")
+        self.assertEqual(new_account["0123456789"]["accounts"]["melli"]["account_name"], "melli")
+        self.assertEqual(new_account["0123456789"]["accounts"]["melli"]["_balance"], 50_000)
+        
+        with self.assertRaises(custom_exceptions.AlreadyExistAccount):
+            BankAccount.create_account(national_id, account_name, fname, lname, balance, password)
+
+        pass1 = BankAccount.hashing("1234")
+        pass2 = BankAccount.hashing("1234")
+        self.assertEqual(pass1, pass2)
 
     def test_deposit(self):
-        BankAccount.create_account("2210240344", "Melli", "Reza", "Saraey", 100_000, "1234")
-        acc1 = Human.json_import(BankAccount.FILENAME)
-        cvv2 = acc1["2210240344"]["Melli"]["cvv2"]
+        national_id = "0123456789"
+        account_name = "melli"
+        password = "1234"
         deposit_amount = 50_000
-        BankAccount.deposit("2210240344", "Melli", "1234", cvv2, deposit_amount)
-        self.assertEqual(acc1["2210240344"]["Melli"]["_balance"], 150_000)
+        accounts = BankAccount.json_import(FILENAME)
+        cvv2 = accounts[national_id]["accounts"][account_name]["cvv2"]
+        BankAccount.deposit(national_id, account_name, password, cvv2, deposit_amount)
+        accounts = BankAccount.json_import(FILENAME)
+        self.assertEqual(accounts[national_id]["accounts"][account_name]["_balance"], 100_000)
         
-    #    account2 = BankAccount("2210000344", "Reza", "Saraey", 50_000, "1234")
-    #    deposit_amount = -45_000
-    #    with self.assertRaises(BalanceMinimum):
-    #        account2.deposit(deposit_amount)
-#
-    #def test_withdraw(self):
-    #    account1 = BankAccount("2210000344", "Reza", "Saraey", 100_000, "1234")
-    #    withdraw_amount = 50_000
-    #    account1.withdraw(withdraw_amount)
-    #    self.assertEqual(account1.balance, 50_000)
-    #    
-    #    account2 = BankAccount("2210000344", "Reza", "Saraey", 50_000, "1234")
-    #    withdraw_amount = 45_000
-    #    with self.assertRaises(BalanceMinimum):
-    #        account2.withdraw(withdraw_amount)
-#
-    #def test_create_account(self):
-    #    BankAccount.create_account("2210240300", "reza", "saraey", 10_000, "1234")
-    #    data = Human.json_import("./database/bank_accounts.json")
-    #    print(data["2210240300"])
-    #    self.assertEqual(data["2210240300"]["national_id"], "2210240300")
-    #    self.assertEqual(data["2210240300"]["first_name"], "reza")
-    #    self.assertEqual(data["2210240300"]["last_name"], "saraey")
-    #    self.assertEqual(data["2210240300"]["_balance"], 10_000)
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.deposit((national_id.replace("0", "1")), account_name, password, cvv2, deposit_amount)
 
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.deposit(national_id, ("A"+account_name), password, cvv2, deposit_amount)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.deposit(national_id, account_name, ("1"+password), cvv2, deposit_amount)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.deposit(national_id, account_name, password, (cvv2+1), deposit_amount)
+
+        with self.assertRaises(custom_exceptions.BalanceMinimum):
+            BankAccount.deposit(national_id, account_name, password, cvv2, -110_000)
+
+    
+    def test_withdraw(self):
+        national_id = "0123456789"
+        account_name = "melli"
+        password = "1234"
+        withdraw_amount = 50_000
+        accounts = BankAccount.json_import(FILENAME)
+        cvv2 = accounts[national_id]["accounts"][account_name]["cvv2"]
+        BankAccount.withdraw(national_id, account_name, password, cvv2, withdraw_amount)
+        accounts = BankAccount.json_import(FILENAME)
+        self.assertEqual(accounts[national_id]["accounts"][account_name]["_balance"], 50_000)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.withdraw((national_id.replace("0", "1")), account_name, password, cvv2, withdraw_amount)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.withdraw(national_id, ("A"+account_name), password, cvv2, withdraw_amount)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.withdraw(national_id, account_name, ("1"+password), cvv2, withdraw_amount)
+
+        with self.assertRaises(custom_exceptions.UnsuccessfulDeposit):
+            BankAccount.withdraw(national_id, account_name, password, (cvv2+1), withdraw_amount)
+
+        with self.assertRaises(custom_exceptions.BalanceMinimum):
+            BankAccount.withdraw(national_id, account_name, password, cvv2, 110_000)
+    
 def main():
     """
     This is our main module function

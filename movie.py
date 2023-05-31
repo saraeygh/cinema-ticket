@@ -3,16 +3,22 @@
 import json, os
 from custom_exceptions import FilmError, NoCapacityError
 import logging
+import os
 
+LOG_FILE = "./log/movie.log"
+JSON_FILE = "./database/films.json"
 
-log_file = "./log/movie.log"
-json_file = "./database/films.json"
+if not os.path.exists(LOG_FILE):
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
-if not os.path.exists(log_file):
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+LOG_FILE = "./log/movie.log"
+JSON_FILE = "./database/films.json"
+
+if not os.path.exists(LOG_FILE):
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 logger = logging.getLogger(__name__)
-file_h = logging.FileHandler(log_file)
+file_h = logging.FileHandler(LOG_FILE)
 
 file_f = logging.Formatter("%(asctime)s-%(name)s-%(levelname)s-%(massage)s")
 file_h.setFormatter(file_f)
@@ -36,23 +42,23 @@ class Film:
         Film.save_films_to_json("./database/films.json", Film.films)
 
     @classmethod
-    def load_films_from_json(cls, json_file):
+    def load_films_from_json(cls, JSON_FILE):
         """
         This class method is for loading our films and\
                 tickets data in the dictionary\
                 from a json file called database/films.json
         """
-        with open(json_file, mode="r", encoding="utf-8") as file:
+        with open(JSON_FILE, mode="r", encoding="utf-8") as file:
             return json.load(file)
 
     @classmethod
-    def save_films_to_json(cls, json_file, dictionary):
+    def save_films_to_json(cls, JSON_FILE, dictionary):
         """
         This class method is for saving our films and\
                 tickets data in the dictionary\
                 into a json file called database/films.json
         """
-        with open(json_file, mode="w+", encoding="utf-8") as file:
+        with open(JSON_FILE, mode="w+", encoding="utf-8") as file:
             json.dump(dictionary, file, indent=4)
 
     @classmethod

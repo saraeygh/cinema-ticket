@@ -2,92 +2,75 @@
 This module contains Plan, Silver and Glod classes/
 for modeling various types of user plan
 """
-from abc import ABC, abstractmethod
+from abc import ABC
 from human import User
-import datetime
+import custom_exceptions
 from bank_accounts import BankAccount
+from datetime import datetime, timedelta
 
-class Plan(ABC):
-    def __init__(self, username, record_date):
-        self.username = username
-        self.record_date = record_date
+USERS_JSON = "./database/users.json"
 
-# Define user-active mode function
-    @abstractmethod
-    def active(self, username):
-        pass
+class Silver(ABC):
 
-# Define user-deactive mode function
-    @abstractmethod
-    def deactive(self, username):
-        pass
-
-# Definition of discount part function
-    @abstractmethod
-    def use_plan(self, username):
-        pass
-
-    def __str__(self):
-        pass
-
-
-class Silver(Plan):
-
-    PRICE = 100_000
+    PRICE = 10_000
     DISCOUNT = 0.2
 
-    def __init__ (self, username, record_date, credit):
-        super().__init__(username, record_date)
+    def __init__ (self):
+        pass
 
-    def active(self, username):
-        User.change_plan(self, username, "Silver")
+    def active(self, username, national_id, account_name, password, cvv2):
+        BankAccount.withdraw(national_id, account_name, password, cvv2, Silver.PRICE)
         credit = 3
-        # Save credit in user json.
-        BankAccount.withdraw(self, Silver.PRICE)
+        users_data = BankAccount.json_import(USERS_JSON)
+        users_data[username].update({"credit": credit})
+        User.change_plan(self, username, "Silver")
 
     def deactive(self, username):
         User.change_plan(self, username, "Bronze")
 
-    @classmethod
-    def use_plan(self, username, cost, user_credit):
-        if user_credit == 0:
-            print("you have no credit.")
+    def use_plan(self, username, cost, national_id, account_name, password, cvv2):
+
+        users_data = BankAccount.json_import(USERS_JSON)
+
+        if users_data[username]["credit"] == 0:
             Silver.deactive(self, username)
+            return False
         else:
-            user_credit -= 1
-            return cost * (1 - Silver.DISCOUNT)
-    User.charge_wallet += PRICE * DISCOUNT
+            discount_cost = (cost * (1 - Silver.DISCOUNT))
+            BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost)
+            users_data[username]["credit"] -= 1
+            users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
+            BankAccount.json_save(USERS_JSON, users_data)
+            
+class Gold(ABC):
 
-    def __str__(self):
-        # get user_credit from json
-        return f"Remanied count: {self.user_credit}"
-
-
-class Gold(Plan):
-
-    PRICE = 500_000
+    PRICE = 50_000
     DISCOUNT = 0.5
 
-    def __init__(self, username, record_date, credit):
-        super().__init__(username)
+    def __init__(self):
+        pass
  
-    def active(self, username):
+    def active(self, username, national_id, account_name, password, cvv2):
+        BankAccount.withdraw(national_id, account_name, password, cvv2, Gold.PRICE)
+        buy_date_time = datetime.now()
+        users_data = BankAccount.json_import(USERS_JSON)
+        users_data[username].update({"start_date": buy_date_time})
         User.change_plan(self, username, "Gold")
-        start_date = datetime.now()
-        expire_date = start_date + timedelta(days=30)
-        # Save to json
- 
+       
+
     def deactive(self, username):
         User.change_plan(self, username, "Bronze")
-    
-    def use_plan(self, username, cost):
-        # exipre_date = Load user info from json
-        if datetime.now() >  expire_date:
-            print("Your gold plan expired.")
-            Gold.deactive()
-        else:
-            return (cost * (1 - Gold.DISCOUNT)), "Energy drink"
-            BankAccount.withdraw(self, Gold.PRICE)
 
-    def __str__(self):
-        return f"remanied expire_date: {self.user_credit}"
+    def use_plan(self, username, cost, national_id, account_name, password, cvv2):
+
+        users_data = BankAccount.json_import(USERS_JSON)
+
+        if datetime.now() - users_data[username]["start_date"] > timedelta(days = 30): 
+            Gold.deactive(self, username)
+            return False
+        else:
+            discount_cost = (cost * (1 - Gold.DISCOUNT))
+            BankAccount.withdraw(national_id, account_name, password, cvv2, discount_cost)
+            users_data[username]["credit"] -= 1
+            users_data[username]["wallet"] += (Silver.DISCOUNT * cost)
+            BankAccount.json_save(USERS_JSON, users_data)
