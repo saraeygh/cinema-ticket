@@ -4,7 +4,7 @@ import sys
 import datetime
 import argparse
 from getpass import getpass
-import os
+import os, platform
 from movie import Film
 from custom_exceptions import (
     UserError,
@@ -15,8 +15,14 @@ from custom_exceptions import (
     FilmError,
     PhoneNumberError
 )
-
 from human import Human, User, Admin
+
+
+if platform.system() == "Linux":
+    clear_cmd = "clear"
+else:
+    clear_cmd = "cls"
+
 
 if not os.path.isdir("./database"):
     os.mkdir("./database")
@@ -38,8 +44,9 @@ if (args.username is not None) and (args.password is not None):
         print("Username Already Taken! \n")
         sys.exit("Exiting the Admin Creating Interface...")
     else:
+        os.system(clear_cmd)
         print("Admin Created! \n")
-        sys.exit("Exiting the Admin Creating Interface...")
+        sys.exit("\n\nExiting the Admin Creating Interface...")
 
 while 1:
     print("\n***** - Welcome to cinema Ticket - *****")
