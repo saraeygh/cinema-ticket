@@ -230,12 +230,12 @@ class BankAccount:
         accounts_info = BankAccount.json_import(BankAccount.FILENAME)
 
         if national_id not in accounts_info:
-            raise custom_exceptions.UnsuccessfulDeposit(
+            raise custom_exceptions.UnsuccessfulIdDeposit(
                 "Unsuccessful deposit, national ID not found."
             )
 
         if account_name not in accounts_info[national_id]["accounts"]:
-            raise custom_exceptions.UnsuccessfulDeposit(
+            raise custom_exceptions.UnsuccessfulAccountDeposit(
                 "Unsuccessful deposit, No such account."
             )
 
@@ -245,12 +245,12 @@ class BankAccount:
                 "_BankAccount__password"
             ]
         ):
-            raise custom_exceptions.UnsuccessfulDeposit(
+            raise custom_exceptions.UnsuccessfulAccountDeposit(
                 "Unsuccessful deposit, Wrong password."
             )
 
         if cvv2 != accounts_info[national_id]["accounts"][account_name]["cvv2"]:
-            raise custom_exceptions.UnsuccessfulDeposit(
+            raise custom_exceptions.UnsuccessfulCvv2Deposit(
                 "Unsuccessful deposit, Wrong CVV2."
             )
 
