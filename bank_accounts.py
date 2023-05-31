@@ -9,9 +9,8 @@ class Client:
     FILENAME = "./database/bank_accounts.json"
     clients_info = {}
 
-    def __init__(
-        self, national_id: str, first_name: str, last_name: str, accounts: dict = {}
-    ):
+    def __init__(self, national_id: str, first_name: str, last_name: str, accounts: dict = {}):
+
         if Client.national_id_valid(national_id):
             self.national_id = national_id
         else:
@@ -19,6 +18,7 @@ class Client:
         self.first_name = first_name
         self.last_name = last_name
         self.accounts = accounts
+        print(self.__dict__)
         Client.clients_info.update({self.national_id: self.__dict__})
 
     @staticmethod
@@ -113,10 +113,14 @@ class BankAccount:
             Client(national_id, first_name, last_name)
             new_account = BankAccount(national_id, account_name, balance, password)
             Client.clients_info.update({new_account.national_id: new_account.__dict__})
+            BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
         else:
             BankAccount.accounts_dict = Client.clients_info[national_id]["accounts"]
             BankAccount(national_id, account_name, balance, password)
             Client.clients_info[national_id]["accounts"] = BankAccount.accounts_dict
+            BankAccount.json_save(BankAccount.FILENAME, Client.clients_info)
+
+
 
     @staticmethod
     def hashing(password: str):
@@ -276,17 +280,17 @@ class BankAccount:
         accounts_info[national_id][account_name]["_balance"] -= amount
         BankAccount.json_save(BankAccount.FILENAME, accounts_info)
 
-    def __str__(self) -> str:
-        """Cutomize print output of object."""
-        return f"""
-        National ID: {self.national_id}
-        Name: {self.first_name},
-        Last: {self.last_name},
-        Balance: {self._balance},
-        Password: {self._password},
-        creation_date: {self.creation_date},
-        cvv2: {self.cvv2}
-        """
+    #def __str__(self) -> str:
+    #    """Cutomize print output of object."""
+    #    return f"""
+    #    National ID: {self.national_id}
+    #    Name: {self.first_name},
+    #    Last: {self.last_name},
+    #    Balance: {self._balance},
+    #    Password: {self._password},
+    #    creation_date: {self.creation_date},
+    #    cvv2: {self.cvv2}
+    #    """
 
 
 def main():
@@ -295,10 +299,8 @@ def main():
         os.makedirs(os.path.dirname(BankAccount.FILENAME), exist_ok=True)
         BankAccount.json_save(BankAccount.FILENAME, {})
 
-    BankAccount.create_account(
-        "1234567890", "Melli", "Reza", "Saraey", 100_000, "1234"
-    )
-
+    BankAccount.create_account("2210240344", "melli", "reza", "saraey", 100_000, "1234")
+    Client("2210240345", "rezaa", "sara")
 
 if __name__ == "__main__":
     main()
