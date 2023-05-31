@@ -212,6 +212,10 @@ while 1:
                         hour, minute = input("Enter Scene time (HH:MM): ")
                         scene_time = datetime.time(hour=int(hour), minute=int(minute)).isoformat(timespec='minutes')
                         ticket_capacity = int(input("Enter the Scene Capacity: "))
+                        try:
+                            Admin.add_show(film_name, film_date, scene_time, ticket_capacity)
+                        except Exception:
+                            print("Invalid truncation, please Try again.")
  
 
                     elif stat == "4":
