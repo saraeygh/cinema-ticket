@@ -15,6 +15,7 @@ class Film:
         self.age_rating = age_rating
         self.tickets = tickets
         Film.films.update({self.name: self.__dict__})
+        Film.save_films_to_json(Film.films)
 
     films = {}
 
