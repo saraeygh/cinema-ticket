@@ -90,7 +90,7 @@ class Ticket(Film):
         )
         for film, info in Film.films.items():
             if film == self.name:
-                info["tickets"] = Ticket.ticket_dict
+                info["tickets"].update(Ticket.ticket_dict)
         Film.save_films_to_json(Film.films)
 
     @staticmethod
@@ -98,6 +98,7 @@ class Ticket(Film):
         """
         This method is for adding a ticket from a defined film
         """
+        Ticket.ticket_dict.clear()
         t_obj = Ticket(name, scene_date, showtime, capacity)
         t_obj.delete_film_obj()
 
