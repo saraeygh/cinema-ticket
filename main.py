@@ -26,21 +26,21 @@ else:
 
 if not os.path.isdir("./database"):
     os.mkdir("./database")
-
 if os.path.exists("./database/admins.json"):
     Admin.dictionary = Human.json_import("./database/admins.json")
 else:
     Human.json_save("./database/admins.json", {})
 
+# Admin signup through a scripting command - Checked: OK
 parser = argparse.ArgumentParser(description="Take Username and Password from CLI and Create an Admin with those Information.")
 parser.add_argument("-u", "--username", type=str, help="Username of New Admin")
 parser.add_argument("-p", "--password", type=str, help="Password of New Admin")
 args = parser.parse_args()
-
 if (args.username is not None) and (args.password is not None):
     try:
         Admin.signup(args.username, args.password)
     except RepUserError:
+        os.system(clear_cmd)
         print("Username Already Taken! \n")
         sys.exit("Exiting the Admin Creating Interface...")
     else:
@@ -48,19 +48,27 @@ if (args.username is not None) and (args.password is not None):
         print("Admin Created! \n")
         sys.exit("\n\nExiting the Admin Creating Interface...")
 
+
 while 1:
     print("\n***** - Welcome to cinema Ticket - *****")
-    stat = input("Stat (1(User mode) - 2(Admin mode)) - 0(Exit)   ")
+    stat = input("Stat\n1 - User mode\n2 - Admin mode\n0 - Exit\nEnter command number: ")
+    os.system(clear_cmd)
+
+
     if stat == "1":
         if os.path.exists("./database/users.json"):
             User.dictionary = Human.json_import("./database/users.json")
         else:
             Human.json_save("./database/users.json", {})
 
+
         while 1:
             print("\n******** - Welcome to user management panel - ********\n")
-            stat = input("Stat (0(Exit) - 1(Sign Up) - 2(Sign In)):   ")
+            stat = input("Stat:\n1 - Sign Up\n2 - Sign In\n0 - Exit\nEnter command number: ")
+            os.system(clear_cmd)
 
+
+            # User sign up Checked: OK.
             if stat == "1":
                 print("\n********** ^ Sign up form ^ **********\n")
                 fname = input("Enter First Name: ")
@@ -68,17 +76,26 @@ while 1:
                 username = input("Enter Username: ")
                 password = getpass("Enter Password: ")
                 birth_date = input("Enter Birth date (YYYY/MM/DD): ")
-                phone_number = input("Enter Phone number(Optional): ")
+                phone_number = input("Enter Phone number (e.g. 09876543210) : ")
+                os.system(clear_cmd)
                 try:
                     User.signup(
                         fname, lname, username, password, birth_date, phone_number
                     )
                 except RepUserError:
+                    os.system(clear_cmd)
                     print("\nUsername Already Taken! ")
                 except ShortPasswordError:
+                    os.system(clear_cmd)
                     print("\nToo Short Password! ")
+                except PhoneNumberError:
+                    os.system(clear_cmd)
+                    print("Invalid phone number (e.g. 09876543210).")
                 else:
+                    os.system(clear_cmd)
                     print("\nSigning Up Completed! ")
+        
+
             elif stat == "2":
                 print("\n************** - Login form - **************\n")
                 username = input("Enter Username: ")
@@ -188,19 +205,22 @@ while 1:
                         continue
 
             elif stat == "0":
+                os.system(clear_cmd)
                 print("\nExiting the User Management Panel... ")
                 break
 
             else:
+                os.system(clear_cmd)
                 print("\nInvalid State! ")
                 continue
 
     elif stat == "2":
         while 1:
             print("\n******** - admin management panel - ********\n")
-            print()
-            stat = input("Stat (0(Exit) - 1(Sign In)):   ")
-
+            stat = input("Stat:\n1 - Sign In\n0 - Exit\nEnter command number:  ")
+            os.system(clear_cmd)
+            
+            
             if stat == "1":
                 print("\n************** - Login form - **************\n")
                 try:
@@ -208,12 +228,15 @@ while 1:
                     password = getpass("Enter Password: ")
                     admin_object = Admin.sign_in_validation(username, password)
                 except UserError:
+                    os.system(clear_cmd)
                     print("\nUsername not Found! ")
                     continue
                 except PasswordError:
+                    os.system(clear_cmd)
                     print("\nWrong Password! ")
                     continue
                 else:
+                    os.system(clear_cmd)
                     print("\nSigning In Completed! ")
                     if os.path.isfile("./database/films.json"):
                         Film.films = Film.load_films_from_json()
@@ -223,7 +246,7 @@ while 1:
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
                     stat = input(
-                        "Stat (1(Add film) - 2(Remove film) - 3(Add Ticket) - 4(Show Your Information) - 5(Edit Username) - 6(Password Change) - 7(Back to Main Menu)):   "
+                        "Stat:\n1 - Add film\n2 - Remove film\n3 - Add Ticket\n4 - Show Your Information\n5 - Edit Username\n6 - Password Change\n0 - Back to Main Menu\nEnter your command:"
                     )
                     if stat == "1":
                         print("\n************** ^ Add film ^ **************\n")
@@ -303,7 +326,7 @@ while 1:
                         else:
                             print("\nYour Password has been changed! ")
 
-                    elif stat == "7":
+                    elif stat == "0":
                         print("\nExiting Admin Panel...")
                         admin_object.delete_admin()
                         break
@@ -321,5 +344,11 @@ while 1:
                 continue
 
     elif stat == "0":
+        os.system(clear_cmd)
         print("Exiting the program...")
         break
+
+    else:
+        os.system(clear_cmd)
+        print("Invalid stat.")
+        continue
