@@ -50,8 +50,8 @@ if (args.username is not None) and (args.password is not None):
 
 
 while 1:
-    print("\n***** - Welcome to cinema Ticket - *****")
-    stat = input("Stat\n1 - User mode\n2 - Admin mode\n0 - Exit\nEnter command number: ")
+    print("\n***** - Welcome to cinema Ticket - *****\n")
+    stat = input("Stat:\n1 - User mode\n2 - Admin mode\n0 - Exit\nEnter command number: ")
     os.system(clear_cmd)
 
 
@@ -68,7 +68,7 @@ while 1:
             os.system(clear_cmd)
 
 
-            # User sign up Checked: OK.
+            # User sign up - Checked: OK.
             if stat == "1":
                 print("\n********** ^ Sign up form ^ **********\n")
                 fname = input("Enter First Name: ")
@@ -204,15 +204,18 @@ while 1:
                         print("\nInvalid State! ")
                         continue
 
+
+            # Exit command - Checked: OK.
             elif stat == "0":
                 os.system(clear_cmd)
                 print("\nExiting the User Management Panel... ")
                 break
-
+            # Invalid State command - Checked: OK.
             else:
                 os.system(clear_cmd)
                 print("\nInvalid State! ")
                 continue
+
 
     elif stat == "2":
         while 1:
@@ -220,7 +223,7 @@ while 1:
             stat = input("Stat:\n1 - Sign In\n0 - Exit\nEnter command number:  ")
             os.system(clear_cmd)
             
-            
+            # Admin log in - Checked: OK.
             if stat == "1":
                 print("\n************** - Login form - **************\n")
                 try:
@@ -243,19 +246,21 @@ while 1:
                     else:
                         Film.save_films_to_json({})
 
+
                 while 1:
                     print("\n************ - Admin Dashboard - ************\n")
                     stat = input(
-                        "Stat:\n1 - Add film\n2 - Remove film\n3 - Add Ticket\n4 - Show Your Information\n5 - Edit Username\n6 - Password Change\n0 - Back to Main Menu\nEnter your command:"
+                        "Stat:\n1 - Add film\n2 - Remove film\n3 - Add Ticket\n4 - Show Your Information\n5 - Edit Username\n6 - Password Change\n0 - Back to Main Menu\nEnter command number: "
                     )
+                    os.system(clear_cmd)
+                    # Add new film - Checked: OK.
                     if stat == "1":
                         print("\n************** ^ Add film ^ **************\n")
-                        film_name = input("Enter Film name: ")
-                        film_genre = input(
-                            "Enter Film Genre (Comedy/Action/Family/Romance): "
-                        )
-                        age_rate = input("Enter film Age Rating: ")
+                        film_name = input("Film name: ")
+                        film_genre = input("Film genre (e.g. Comedy/Action/Romance e.t.): ")
+                        age_rate = input("Film age rating: ")
                         Admin.add_film(film_name, film_genre, age_rate)
+                        os.system(clear_cmd)
                         print("\nFilm added successfully! \n")
 
                     elif stat == "2":
@@ -326,12 +331,16 @@ while 1:
                         else:
                             print("\nYour Password has been changed! ")
 
+
+                    # Exit command - Checked: OK
                     elif stat == "0":
+                        os.system(clear_cmd)
                         print("\nExiting Admin Panel...")
                         admin_object.delete_admin()
                         break
-
+                    # Invalid state command - Checked: OK
                     else:
+                        os.system(clear_cmd)
                         print("\nInvalid State! ")
                         continue
 

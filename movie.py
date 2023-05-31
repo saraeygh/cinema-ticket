@@ -8,6 +8,7 @@ class Film:
     """
     This class is for modeling film.
     """
+    films = {}
 
     def __init__(self, name: str, genre: str, age_rating: str, tickets: dict):
         self.name = name
@@ -16,8 +17,7 @@ class Film:
         self.tickets = tickets
         Film.films.update({self.name: self.__dict__})
         Film.save_films_to_json(Film.films)
-
-    films = {}
+    
 
     @classmethod
     def load_films_from_json(cls):
