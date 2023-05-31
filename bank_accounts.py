@@ -1,6 +1,12 @@
-import os, platform, random, custom_exceptions, logging
-from human import Human
+import os
+import hashlib
+import json
+import logging
+import platform
 from datetime import datetime
+import random
+import custom_exceptions
+from human import Human
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -30,6 +36,7 @@ class BankAccount:
     """
     FILENAME = "./database/bank_accounts.json"
     MIN_BALANCE = 10_000
+    accounts_dict = {}
 
     def __init__(
         self,
@@ -64,13 +71,31 @@ class BankAccount:
         self.first_name = first_name
         self.last_name = last_name
         self._balance = balance
-        self._password = Human.hashing(password)
-        self.creation_date = str(datetime.now())
+        self._password = BankAccount.hashing(password)
+        self.creation_date = datetime.now().isoformat(timespec="seconds")
         self.cvv2 = random.randint(1111, 9999)
-        
+
+    @staticmethod
+    def hashing(password: str):
+        """
+        This method is for hashing passwords
+        """
+        hashed_pass = (hashlib.sha256(password.encode("utf-8")).hexdigest())
+        return hashed_pass
+
+    @staticmethod
+    def json_import(filename, dictionary):
+        with open(filename, mode="w+", encoding="utf-8") as file:
+            json.dump(dictionary, file, indent=4)
+
+    @staticmethod
+    def json_save(filename) -> dict:
+        with open(filename, mode="r", encoding="utf-8") as file:
+            return json.load(file)
+
     @staticmethod
     def national_id_valid(national_id: str) -> bool:
-        """Chechs whether national ID is ten digits.
+        """Checks whether national ID is ten digits.
 
         Args:
             national_id (str): User inputed National ID.
@@ -114,7 +139,7 @@ class BankAccount:
         Returns:
             str: Password as string.
         """
-        return self._password
+        return self.__password
 
     @password.setter
     def password(self, password: str):
@@ -128,8 +153,7 @@ class BankAccount:
             raise custom_exceptions.ShortPasswordError("Too short Password!")
         logger.debug(f"Password changed for national ID {self.national_id}")
         password = Human.hashing(password)
-        self._password = password
-
+        self.__password = password
 
     @staticmethod
     def deposit(national_id, account_name, password, cvv2, amount: int):
@@ -142,10 +166,10 @@ class BankAccount:
             custom_exceptions.BalanceMinimum: If balance goes down the min limit.
         """
         accounts_info = Human.json_import(BankAccount.FILENAME)
-        if not national_id in accounts_info:
+        if national_id not in accounts_info:
             logger.debug(f"Unsuccessful deposit, {national_id} not found.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, national ID not found.")
-        if not account_name in accounts_info[national_id]:
+        if account_name not in accounts_info[national_id]:
             logger.debug(f"Unsuccessful deposit, No such account.")
             raise custom_exceptions.UnsuccessfulDeposit("Unsuccessful deposit, No such account.")
         if Human.hashing(password) != accounts_info[national_id][account_name]["_password"]:
